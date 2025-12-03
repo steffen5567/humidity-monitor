@@ -107,7 +107,7 @@ StandardError=journal
 SyslogIdentifier=humidity-monitor
 
 Environment=NODE_ENV=production
-Environment=PORT=3006
+Environment=PORT=9100
 
 [Install]
 WantedBy=multi-user.target
@@ -127,11 +127,11 @@ systemctl status humidity-monitor --no-pager || echo "⚠️  Service might need
 echo "🌐 Configuring nginx..."
 cat > /etc/nginx/sites-available/humidity-monitor <<'EOF'
 server {
-    listen 3006;
+    listen 9100;
     server_name _;
 
     location / {
-        proxy_pass http://localhost:3006;
+        proxy_pass http://localhost:9100;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -144,7 +144,7 @@ server {
 
     # WebSocket support for Socket.io
     location /socket.io/ {
-        proxy_pass http://localhost:3006;
+        proxy_pass http://localhost:9100;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -156,7 +156,7 @@ EOF
 
 # Enable nginx site
 ln -sf /etc/nginx/sites-available/humidity-monitor /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
+# Don't remove default site, as other projects might use it
 
 # Test and restart nginx
 nginx -t
@@ -165,7 +165,7 @@ systemctl restart nginx
 # Configure firewall (if ufw is installed)
 if command -v ufw &> /dev/null; then
     echo "🔒 Configuring firewall..."
-    ufw allow 3006/tcp
+    ufw allow 9100/tcp
     ufw allow 'Nginx Full'
 fi
 
@@ -178,7 +178,7 @@ echo "📋 Service Status:"
 systemctl status humidity-monitor --no-pager | head -n 10
 echo ""
 echo "🌐 Your app should now be accessible at:"
-echo "   http://YOUR_SERVER_IP:3006"
+echo "   http://YOUR_SERVER_IP:9100"
 echo ""
 echo "📊 Useful commands:"
 echo "   View logs:        sudo journalctl -u humidity-monitor -f"

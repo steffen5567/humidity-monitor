@@ -100,7 +100,7 @@ curl -sSL https://raw.githubusercontent.com/IHR_USERNAME/humidity-monitor/master
 ┌─────────────────────────────────────────┐
 │  ✅ Fertig!                             │
 │     App läuft auf:                      │
-│     http://SERVER_IP:3006               │
+│     http://SERVER_IP:9100               │
 └─────────────────────────────────────────┘
 ```
 
@@ -110,9 +110,9 @@ curl -sSL https://raw.githubusercontent.com/IHR_USERNAME/humidity-monitor/master
 ```
 Internet
     ↓
-Nginx (Port 3006)
+Nginx (Port 9100)
     ↓ Reverse Proxy + WebSocket Support
-Node.js App (Port 3006)
+Node.js App (Port 9100)
     ↓ Express + Socket.io
 JSON Files (Data Storage)
 ```

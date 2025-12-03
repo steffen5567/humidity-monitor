@@ -27,9 +27,9 @@ Vollständige Dokumentation für das Deployment der Humidity Monitor App auf ein
 ┌─────────────────────────────────────┐
 │         Linux Server                │
 ├─────────────────────────────────────┤
-│  Nginx (Port 3006)                  │
+│  Nginx (Port 9100)                  │
 │    ↓ Reverse Proxy                  │
-│  Node.js App (Port 3006)            │
+│  Node.js App (Port 9100)            │
 │    ↓ Express + Socket.io            │
 │  JSON Files (Data Storage)          │
 └─────────────────────────────────────┘
@@ -38,7 +38,7 @@ Vollständige Dokumentation für das Deployment der Humidity Monitor App auf ein
 ### Komponenten
 
 **Node.js Service:**
-- Express.js Server auf Port 3006
+- Express.js Server auf Port 9100
 - Socket.io für Echtzeit-Updates
 - Läuft als systemd-Service
 - Automatischer Neustart bei Fehler
@@ -61,7 +61,7 @@ Vollständige Dokumentation für das Deployment der Humidity Monitor App auf ein
 - **OS:** Ubuntu 20.04+ (oder ähnliche Debian-basierte Distribution)
 - **RAM:** Mindestens 512 MB
 - **Disk:** Mindestens 2 GB freier Speicherplatz
-- **Netzwerk:** Öffentliche IP-Adresse, Port 3006 erreichbar
+- **Netzwerk:** Öffentliche IP-Adresse, Port 9100 erreichbar
 - **Zugriff:** SSH-Zugang mit sudo-Rechten
 
 ### Lokale Anforderungen
@@ -156,7 +156,7 @@ StandardError=journal
 SyslogIdentifier=humidity-monitor
 
 Environment=NODE_ENV=production
-Environment=PORT=3006
+Environment=PORT=9100
 
 [Install]
 WantedBy=multi-user.target
@@ -178,11 +178,11 @@ sudo nano /etc/nginx/sites-available/humidity-monitor
 Inhalt:
 ```nginx
 server {
-    listen 3006;
+    listen 9100;
     server_name _;
 
     location / {
-        proxy_pass http://localhost:3006;
+        proxy_pass http://localhost:9100;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -194,7 +194,7 @@ server {
     }
 
     location /socket.io/ {
-        proxy_pass http://localhost:3006;
+        proxy_pass http://localhost:9100;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -292,7 +292,7 @@ sudo journalctl -u humidity-monitor -n 50 --no-pager
 
 # Häufige Ursachen:
 # 1. Port bereits belegt
-sudo netstat -tulpn | grep :3006
+sudo netstat -tulpn | grep :9100
 
 # 2. Dependencies fehlen
 cd /var/www/humidity-monitor/data
@@ -321,7 +321,7 @@ sudo nginx -t
 sudo tail -f /var/log/nginx/error.log
 
 # 4. Prüfe ob Port richtig ist
-curl http://localhost:3006
+curl http://localhost:9100
 ```
 
 ### WebSocket-Verbindung schlägt fehl
@@ -402,7 +402,7 @@ git push
 ### Firewall konfigurieren
 
 ```bash
-sudo ufw allow 3006/tcp
+sudo ufw allow 9100/tcp
 sudo ufw enable
 sudo ufw status
 ```
