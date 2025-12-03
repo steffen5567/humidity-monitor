@@ -24,27 +24,21 @@ echo "  4. Setup systemd service"
 echo "  5. Configure nginx"
 echo ""
 
-# Get repository URL from parameter, environment variable, or prompt
+# Get repository URL from parameter, environment variable, or use default
+DEFAULT_REPO_URL="https://github.com/steffen5567/humidity-monitor.git"
+
 if [ -n "$1" ]; then
     REPO_URL="$1"
     echo "📦 Using repository from parameter: $REPO_URL"
-elif [ -z "$REPO_URL" ]; then
-    echo "🔗 Enter your GitHub repository URL"
-    echo "   Example: https://github.com/steffen5567/humidity-monitor.git"
-    echo -n "   URL: "
-    read REPO_URL </dev/tty
+elif [ -n "$REPO_URL" ]; then
+    echo "📦 Using repository from environment: $REPO_URL"
+else
+    REPO_URL="$DEFAULT_REPO_URL"
+    echo "📦 Using default repository: $REPO_URL"
 fi
 
-if [ -z "$REPO_URL" ]; then
-    echo ""
-    echo "❌ Repository URL is required!"
-    echo ""
-    echo "Usage:"
-    echo "  Method 1: curl ... | sudo bash -s https://github.com/user/repo.git"
-    echo "  Method 2: REPO_URL=https://github.com/user/repo.git curl ... | sudo -E bash"
-    echo "  Method 3: Download and run: sudo bash server-setup.sh https://github.com/user/repo.git"
-    exit 1
-fi
+echo "   If you want to use a different repository, run:"
+echo "   sudo bash server-setup.sh YOUR_REPO_URL"
 
 echo ""
 echo "🚀 Starting installation..."
