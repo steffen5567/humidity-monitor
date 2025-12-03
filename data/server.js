@@ -244,7 +244,7 @@ function addSampleData() {
 }
 
 // Server starten
-const PORT = process.env.PORT || 9100;
+const PORT = process.env.PORT || 3006;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,6 +1,9 @@
-# 🌡️ Humidity Monitor - Deployment Guide
+# 🌡️ Stiefens Farm - Deployment Guide
 
-Vollständige Dokumentation für das Deployment der Humidity Monitor App auf einem Linux-Server mit automatischer CI/CD-Pipeline über GitHub Actions.
+Vollständige Dokumentation für das Deployment von Stiefens Farm (Raspberry Server / Humidity Monitor) auf einem Linux-Server mit automatischer CI/CD-Pipeline über GitHub Actions.
+
+**Production:** https://stiefens-farm.de
+**Server-IP:** 178.254.40.108
 
 ## 📋 Inhaltsverzeichnis
 
@@ -119,23 +122,23 @@ npm -v
 #### 3. Repository clonen
 
 ```bash
-sudo mkdir -p /var/www/humidity-monitor
-sudo chown $USER:$USER /var/www/humidity-monitor
-cd /var/www/humidity-monitor
+sudo mkdir -p /root/raspberry_server
+sudo chown $USER:$USER /root/raspberry_server
+cd /root/raspberry_server
 git clone https://github.com/IHR_GITHUB_USERNAME/humidity-monitor.git .
 ```
 
 #### 4. Dependencies installieren
 
 ```bash
-cd /var/www/humidity-monitor/data
+cd /root/raspberry_server/data
 npm install
 ```
 
 #### 5. Systemd Service erstellen
 
 ```bash
-sudo nano /etc/systemd/system/humidity-monitor.service
+sudo nano /etc/systemd/system/raspberry-server.service
 ```
 
 Inhalt:
@@ -147,16 +150,16 @@ After=network.target
 [Service]
 Type=simple
 User=YOUR_USERNAME
-WorkingDirectory=/var/www/humidity-monitor/data
+WorkingDirectory=/root/raspberry_server/data
 ExecStart=/usr/bin/node server.js
 Restart=always
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=humidity-monitor
+SyslogIdentifier=raspberry-server
 
 Environment=NODE_ENV=production
-Environment=PORT=9100
+Environment=PORT=3006
 
 [Install]
 WantedBy=multi-user.target
@@ -165,14 +168,14 @@ WantedBy=multi-user.target
 Service aktivieren:
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable humidity-monitor
-sudo systemctl start humidity-monitor
+sudo systemctl enable raspberry-server
+sudo systemctl start raspberry-server
 ```
 
 #### 6. Nginx konfigurieren
 
 ```bash
-sudo nano /etc/nginx/sites-available/humidity-monitor
+sudo nano /etc/nginx/sites-available/stiefens-farm.de
 ```
 
 Inhalt:
@@ -206,7 +209,7 @@ server {
 
 Site aktivieren:
 ```bash
-sudo ln -s /etc/nginx/sites-available/humidity-monitor /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/stiefens-farm.de /etc/nginx/sites-enabled/
 sudo rm /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl restart nginx
@@ -241,7 +244,7 @@ Fügen Sie diese 4 Secrets hinzu:
 | `SSH_PRIVATE_KEY` | Privater SSH-Key | (Kompletter Key inkl. Header/Footer) |
 | `SERVER_HOST` | Server-IP oder Hostname | `123.45.67.89` |
 | `SERVER_USER` | SSH-Benutzername | `ubuntu` |
-| `DEPLOY_PATH` | App-Pfad auf Server | `/var/www/humidity-monitor` |
+| `DEPLOY_PATH` | App-Pfad auf Server | `/root/raspberry_server` |
 
 ### 3. Deployment testen
 
@@ -261,7 +264,7 @@ Falls Sie ohne GitHub Actions deployen möchten:
 
 ```bash
 # Auf dem Server
-cd /var/www/humidity-monitor
+cd /root/raspberry_server
 
 # Code aktualisieren
 git pull origin master
@@ -295,11 +298,11 @@ sudo journalctl -u humidity-monitor -n 50 --no-pager
 sudo netstat -tulpn | grep :9100
 
 # 2. Dependencies fehlen
-cd /var/www/humidity-monitor/data
+cd /root/raspberry_server/data
 npm install
 
 # 3. Dateiberechtigungen
-sudo chown -R $USER:$USER /var/www/humidity-monitor
+sudo chown -R $USER:$USER /root/raspberry_server
 
 # Service neu starten
 sudo systemctl restart humidity-monitor
@@ -331,7 +334,7 @@ curl http://localhost:9100
 **Lösung:**
 ```bash
 # Prüfe Nginx-Konfiguration für WebSocket-Support
-sudo nano /etc/nginx/sites-available/humidity-monitor
+sudo nano /etc/nginx/sites-available/stiefens-farm.de
 
 # Stelle sicher, dass diese Zeilen vorhanden sind:
 # proxy_http_version 1.1;
@@ -359,7 +362,7 @@ sudo systemctl reload nginx
 2. **Permission denied:**
    ```bash
    # Stelle sicher, dass User Berechtigung hat
-   sudo chown -R $USER:$USER /var/www/humidity-monitor
+   sudo chown -R $USER:$USER /root/raspberry_server
 
    # User muss systemctl ohne sudo ausführen können
    sudo visudo
@@ -369,7 +372,7 @@ sudo systemctl reload nginx
 3. **Git pull schlägt fehl:**
    ```bash
    # Repository-Status prüfen
-   cd /var/www/humidity-monitor
+   cd /root/raspberry_server
    git status
 
    # Bei Konflikten
@@ -421,7 +424,7 @@ sudo certbot --nginx -d ihre-domain.de
 sudo apt update && sudo apt upgrade -y
 
 # Node.js-Dependencies
-cd /var/www/humidity-monitor/data
+cd /root/raspberry_server/data
 npm update
 ```
 
@@ -433,7 +436,7 @@ npm update
 
 ```bash
 npm install -g pm2
-cd /var/www/humidity-monitor/data
+cd /root/raspberry_server/data
 pm2 start server.js --name humidity-monitor
 pm2 startup
 pm2 save

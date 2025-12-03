@@ -1,6 +1,8 @@
 # 🚀 Quick Start - Deployment in 10 Minuten
 
-Schnelle Anleitung, um die Humidity Monitor App auf Ihrem Server zu deployen.
+Schnelle Anleitung, um Stiefens Farm (Raspberry Server / Humidity Monitor) auf Ihrem Server zu deployen.
+
+**Production:** https://stiefens-farm.de
 
 ## Schritt 1: Server vorbereiten (5 Minuten)
 
@@ -48,7 +50,7 @@ Klicken Sie auf **"New repository secret"** für jedes Secret:
 - Ihr SSH-Benutzername, z.B.: `ubuntu` oder `root`
 
 **4. DEPLOY_PATH**
-- Genau so eingeben: `/var/www/humidity-monitor`
+- Genau so eingeben: `/root/raspberry_server`
 
 ---
 
@@ -65,7 +67,7 @@ Klicken Sie auf **"New repository secret"** für jedes Secret:
 
 Öffnen Sie im Browser:
 ```
-http://IHR_SERVER_IP:9100
+http://IHR_SERVER_IP:3006
 ```
 
 Sie sollten die Humidity Monitor App sehen!
@@ -92,11 +94,11 @@ sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d ihre-domain.de
 ```
 
-**Port ändern (von 9100 auf 80):**
+**Port ändern (von 3006 auf 80):**
 ```bash
 # Auf dem Server
 sudo nano /etc/nginx/sites-available/humidity-monitor
-# Ändern Sie: listen 9100; → listen 80;
+# Ändern Sie: listen 3006; → listen 80;
 sudo systemctl reload nginx
 ```
 
@@ -131,7 +133,7 @@ Siehe: [deploy/DEPLOYMENT.md](DEPLOYMENT.md)
 ## 🎉 Das war's!
 
 Ihre App läuft jetzt auf:
-- **Frontend:** http://IHR_SERVER_IP:9100
-- **API:** http://IHR_SERVER_IP:9100/api/measurements/bluetezelt
+- **Frontend:** http://IHR_SERVER_IP:3006
+- **API:** http://IHR_SERVER_IP:3006/api/measurements/bluetezelt
 
 Bei jedem Push zu GitHub wird automatisch deployed! 🚀

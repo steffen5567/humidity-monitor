@@ -66,7 +66,7 @@ echo "✅ Node.js version: $(node -v)"
 echo "✅ npm version: $(npm -v)"
 
 # Create deployment directory
-DEPLOY_PATH="/var/www/humidity-monitor"
+DEPLOY_PATH="/root/raspberry_server"
 echo "📁 Creating deployment directory: $DEPLOY_PATH"
 mkdir -p $DEPLOY_PATH
 cd $DEPLOY_PATH
@@ -90,9 +90,9 @@ sudo -u $ACTUAL_USER npm install
 
 # Create systemd service
 echo "⚙️  Creating systemd service..."
-cat > /etc/systemd/system/humidity-monitor.service <<EOF
+cat > /etc/systemd/system/raspberry-server.service <<EOF
 [Unit]
-Description=Humidity Monitor Node.js Service
+Description=Raspberry Server - Stiefens Farm (Node.js)
 After=network.target
 
 [Service]
@@ -104,34 +104,35 @@ Restart=always
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=humidity-monitor
+SyslogIdentifier=raspberry-server
 
 Environment=NODE_ENV=production
-Environment=PORT=9100
+Environment=PORT=3006
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 # Enable and start service
-echo "🔧 Enabling and starting humidity-monitor service..."
+echo "🔧 Enabling and starting raspberry-server service..."
 systemctl daemon-reload
-systemctl enable humidity-monitor
-systemctl start humidity-monitor
+systemctl enable raspberry-server
+systemctl start raspberry-server
 
 # Check service status
 sleep 2
-systemctl status humidity-monitor --no-pager || echo "⚠️  Service might need manual configuration"
+systemctl status raspberry-server --no-pager || echo "⚠️  Service might need manual configuration"
 
 # Configure nginx
 echo "🌐 Configuring nginx..."
-cat > /etc/nginx/sites-available/humidity-monitor <<'EOF'
+cat > /etc/nginx/sites-available/stiefens-farm.de <<'EOF'
+# HTTP Server - Redirect to HTTPS (will be configured by Certbot later)
 server {
-    listen 9100;
-    server_name _;
+    listen 80;
+    server_name stiefens-farm.de www.stiefens-farm.de;
 
     location / {
-        proxy_pass http://localhost:9100;
+        proxy_pass http://localhost:3006;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -140,23 +141,27 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+
+        # For Socket.IO long-lived connections
+        proxy_read_timeout 300s;
+        proxy_buffering off;
     }
 
     # WebSocket support for Socket.io
     location /socket.io/ {
-        proxy_pass http://localhost:9100;
+        proxy_pass http://localhost:3006;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 300s;
     }
 }
 EOF
 
 # Enable nginx site
-ln -sf /etc/nginx/sites-available/humidity-monitor /etc/nginx/sites-enabled/
-# Don't remove default site, as other projects might use it
+ln -sf /etc/nginx/sites-available/stiefens-farm.de /etc/nginx/sites-enabled/
 
 # Test and restart nginx
 nginx -t
@@ -165,7 +170,6 @@ systemctl restart nginx
 # Configure firewall (if ufw is installed)
 if command -v ufw &> /dev/null; then
     echo "🔒 Configuring firewall..."
-    ufw allow 9100/tcp
     ufw allow 'Nginx Full'
 fi
 
@@ -175,19 +179,21 @@ echo "✅ Installation Complete!"
 echo "======================================"
 echo ""
 echo "📋 Service Status:"
-systemctl status humidity-monitor --no-pager | head -n 10
+systemctl status raspberry-server --no-pager | head -n 10
 echo ""
 echo "🌐 Your app should now be accessible at:"
-echo "   http://YOUR_SERVER_IP:9100"
+echo "   http://stiefens-farm.de (or http://YOUR_SERVER_IP)"
 echo ""
 echo "📊 Useful commands:"
-echo "   View logs:        sudo journalctl -u humidity-monitor -f"
-echo "   Restart service:  sudo systemctl restart humidity-monitor"
-echo "   Check status:     sudo systemctl status humidity-monitor"
-echo "   Restart nginx:    sudo systemctl restart nginx"
+echo "   View logs:        journalctl -u raspberry-server -f"
+echo "   Restart service:  systemctl restart raspberry-server"
+echo "   Check status:     systemctl status raspberry-server"
+echo "   Restart nginx:    systemctl restart nginx"
 echo ""
 echo "📋 Next steps:"
-echo "   1. Run: deploy/setup-ssh-keys.sh"
-echo "   2. Configure GitHub Secrets (see deploy/QUICKSTART.md)"
-echo "   3. Test deployment workflow"
+echo "   1. Configure SSL with Certbot:"
+echo "      certbot --nginx -d stiefens-farm.de -d www.stiefens-farm.de"
+echo "   2. Setup SSH keys: bash deploy/setup-ssh-keys.sh"
+echo "   3. Configure GitHub Secrets (see deploy/QUICKSTART.md)"
+echo "   4. Test deployment workflow"
 echo ""

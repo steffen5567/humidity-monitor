@@ -49,7 +49,11 @@ npm install
 node server.js
 ```
 
-Die App läuft nun auf: `http://localhost:9100`
+Die App läuft nun auf: `http://localhost:3006`
+
+**Production:**
+- Domain: https://stiefens-farm.de
+- Server-IP: http://178.254.40.108:3006
 
 ## 🚀 Production Deployment
 
@@ -138,7 +142,7 @@ Messungen werden in JSON-Dateien gespeichert:
 ### Port ändern
 In `data/server.js`:
 ```javascript
-const PORT = 9100; // Ändern Sie diesen Wert
+const PORT = 3006; // Ändern Sie diesen Wert
 ```
 
 ### Speicher-Intervall anpassen
@@ -152,7 +156,7 @@ setInterval(saveSensorData, 5 * 60 * 1000);
 ### Port bereits belegt
 ```bash
 # Prozess finden
-sudo netstat -tulpn | grep :9100
+sudo netstat -tulpn | grep :3006
 
 # Prozess beenden
 sudo kill <PID>
@@ -166,7 +170,7 @@ sudo journalctl -u humidity-monitor -f
 
 ### WebSocket-Verbindung schlägt fehl
 - Prüfen Sie die Nginx-Konfiguration für WebSocket-Support
-- Stellen Sie sicher, dass Port 9100 erreichbar ist
+- Stellen Sie sicher, dass Port 3006 erreichbar ist
 
 Mehr Details: [deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md)
 
