@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPD Calculation</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>VPD Calculation</h1>
+    
+    <!-- Dein Formular, das Werte anzeigt und zum Berechnen nutzt -->
+    <form id="vpdForm">
+        <label for="airTemp">Air Temperature (°C):</label>
+        <input type="number" id="airTemp" name="airTemp" step="0.1">
+        <br>
+        <label for="humidity">Humidity (%):</label>
+        <input type="number" id="humidity" name="humidity" step="0.1">
+        <br>
+        <button type="submit">Calculate</button>
+    </form>
+    
+    <div id="vpdPlot"></div>
+    <div id="vpdInfo"></div>
+
+    <!-- Socket.io-Client -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script>
+        // 1) Deine VPD-Berechnung
+        function calculateVPD(airTemp, leafTemp, humidity) {
+            const svp_leaf = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+            const avp = svp_leaf * (humidity / 100);
+            return svp_leaf - avp; // kPa
+        }
+
+        // 2) Sobald das Formular gesendet wird, zeichnen wir das Plot neu
+        document.getElementById('vpdForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const airTemp = parseFloat(document.getElementById('airTemp').value);
+            const humidity = parseFloat(document.getElementById('humidity').value);
+
+            // Leaf-Temp = airTemp - 2 (Beispiel)
+            const leafTemp = airTemp - 2; 
+            const vpd = calculateVPD(airTemp, leafTemp, humidity);
+
+            // Daten für die Konturplot
+            const temperatures = Array.from({length: 100}, (_, i) => 20 + i * 0.1);
+            const humidities = Array.from({length: 100}, (_, i) => 40 + i * 0.3);
+            const T = [];
+            const H = [];
+            const VPD = [];
+
+            // Gitter erzeugen
+            for (let temp of temperatures) {
+                const rowT = [];
+                const rowH = [];
+                const rowVPD = [];
+                for (let hum of humidities) {
+                    rowT.push(temp);
+                    rowH.push(hum);
+                    rowVPD.push(calculateVPD(temp, temp - 2, hum));
+                }
+                T.push(rowT);
+                H.push(rowH);
+                VPD.push(rowVPD);
+            }
+
+            // Plot-Daten
+            const data = [
+                {
+                    z: VPD,
+                    x: temperatures,
+                    y: humidities,
+                    type: 'contour',
+                    contours: {
+                        coloring: 'heatmap'
+                    }
+                },
+                {
+                    x: [airTemp],
+                    y: [humidity],
+                    mode: 'markers',
+                    marker: {
+                        color: 'red',
+                        size: 12
+                    },
+                    name: `Current VPD: ${vpd.toFixed(2)} kPa`
+                }
+            ];
+
+            // Plot aktualisieren/neu zeichnen
+            Plotly.newPlot('vpdPlot', data, {
+                title: 'VPD Calculation',
+                xaxis: {title: 'Temperature (°C)'},
+                yaxis: {title: 'Humidity (%)'}
+            });
+
+            // Info-Text
+            const vpdInfo = `
+                <p>Current VPD: ${vpd.toFixed(2)} kPa</p>
+                <p>Optimal VPD for Vegetative Phase: 0.8 - 1.2 kPa</p>
+                <p>Optimal VPD for Flowering Phase: 1.0 - 1.5 kPa</p>
+            `;
+            document.getElementById('vpdInfo').innerHTML = vpdInfo;
+
+            // VPD-Phasenspezifische Tipps
+            const phaseTipps = {
+                'keimung': {
+                    'optimal': 'Optimal für Keimung: Das VPD liegt im idealen Bereich (0.4-0.8 kPa). Halte die Luftfeuchtigkeit bei 70-80% und die Temperatur bei 22-24°C.',
+                    'zu_niedrig': 'VPD zu niedrig für Keimung! Reduziere die Luftfeuchtigkeit leicht oder erhöhe die Temperatur um 1-2°C, um ein besseres Wurzelwachstum zu fördern.',
+                    'zu_hoch': 'VPD zu hoch für Keimung! Erhöhe die Luftfeuchtigkeit und stelle sicher, dass deine Keimlinge nicht austrocknen. Verwende eine Kuppel, um die Feuchtigkeit zu halten.'
+                },
+                'vegetativ': {
+                    'optimal': 'Optimal für die vegetative Phase: Das VPD liegt im idealen Bereich (0.8-1.2 kPa). Deine Pflanzen können optimal Nährstoffe aufnehmen und wachsen.',
+                    'zu_niedrig': 'VPD zu niedrig für die vegetative Phase! Reduziere die Luftfeuchtigkeit auf 60-70%, um Schimmelrisiken zu vermeiden und die Pflanzenstärkung zu fördern.',
+                    'zu_hoch': 'VPD zu hoch für die vegetative Phase! Erhöhe die Luftfeuchtigkeit, um Stress zu vermeiden. Pflanzen könnten sonst übermäßig transpirieren und beim Wachstum gehemmt werden.'
+                },
+                'frühe_blüte': {
+                    'optimal': 'Optimal für die frühe Blütephase: Das VPD liegt im idealen Bereich (1.0-1.5 kPa). Perfekt für die Entwicklung der ersten Blüten.',
+                    'zu_niedrig': 'VPD zu niedrig für die frühe Blüte! Senke die Luftfeuchtigkeit schrittweise auf 50-60%, um das Risiko von Schimmel und Fäulnis zu reduzieren.',
+                    'zu_hoch': 'VPD zu hoch für die frühe Blüte! Deine Pflanzen können unter Wasserstress leiden. Erhöhe die Luftfeuchtigkeit oder senke die Temperatur leicht.'
+                },
+                'späte_blüte': {
+                    'optimal': 'Optimal für die späte Blütephase: Das VPD liegt im idealen Bereich (1.2-1.8 kPa). Ideal für die Harzproduktion und Terpenen-Entwicklung.',
+                    'zu_niedrig': 'VPD zu niedrig für die späte Blüte! Senke die Luftfeuchtigkeit auf 40-50%, um die Gefahr von Schimmel und Budrot in den dichten Blüten zu minimieren.',
+                    'zu_hoch': 'VPD zu hoch für die späte Blüte! Überprüfe die Bewässerung, da die Pflanzen in dieser Phase unter zu hohem VPD besonders stressanfällig sind.'
+                },
+                'trocknung': {
+                    'optimal': 'Optimal für die Trocknungsphase: Das VPD liegt im idealen Bereich (1.0-1.2 kPa). Dies fördert eine langsame, gleichmäßige Trocknung.',
+                    'zu_niedrig': 'VPD zu niedrig für die Trocknung! Erhöhe die Temperatur leicht oder senke die Luftfeuchtigkeit, um Schimmelbildung auf den Blüten zu vermeiden.',
+                    'zu_hoch': 'VPD zu hoch für die Trocknung! Deine Blüten trocknen zu schnell und könnten Chlorophyll einschließen. Erhöhe die Luftfeuchtigkeit oder senke die Temperatur.'
+                }
+            };
+
+            function updateVPDTipp(vpd, phase) {
+                // Standardphase, falls keine ausgewählt ist
+                phase = phase || 'vegetativ';
+                
+                // VPD-Bereiche je nach Phase
+                let vpdRanges = {
+                    'keimung': { min: 0.4, max: 0.8 },
+                    'vegetativ': { min: 0.8, max: 1.2 },
+                    'frühe_blüte': { min: 1.0, max: 1.5 },
+                    'späte_blüte': { min: 1.2, max: 1.8 },
+                    'trocknung': { min: 1.0, max: 1.2 }
+                };
+                
+                // Tipp basierend auf Phase und VPD-Wert auswählen
+                let tipp;
+                let range = vpdRanges[phase];
+                
+                if (vpd < range.min) {
+                    tipp = phaseTipps[phase]['zu_niedrig'];
+                } else if (vpd > range.max) {
+                    tipp = phaseTipps[phase]['zu_hoch'];
+                } else {
+                    tipp = phaseTipps[phase]['optimal'];
+                }
+                
+                // Tipp-Element aktualisieren
+                document.getElementById('vpd-tipp').innerHTML = tipp;
+            }
+
+            // Füge dies zur bestehenden VPD-Berechnungsfunktion hinzu
+            function calculateVPD() {
+                // Vorhandener VPD-Berechnungscode...
+                
+                // Am Ende der Funktion, nachdem VPD berechnet wurde:
+                const selectedPhase = document.getElementById('wachstumsphase').value;
+                updateVPDTipp(vpd, selectedPhase);
+            }
+            
+            // Event-Listener für das Phasenauswahl-Dropdown hinzufügen
+            document.addEventListener('DOMContentLoaded', function() {
+                const phaseSelect = document.getElementById('wachstumsphase');
+                if (phaseSelect) {
+                    phaseSelect.addEventListener('change', calculateVPD);
+                }
+            });
+        });
+
+        // 3) Socket.io: Automatische Übernahme von Temperatur & Feuchte
+        const socket = io();
+
+        // Wenn vom Server das Event "updateHumidity" kommt, Felder auffüllen
+        socket.on('updateHumidity', (data) => {
+            console.log('updateHumidity:', data);
+
+            // data = { temperature: xx, humidity: yy, ... }
+            if (typeof data.temperature === 'number') {
+                document.getElementById('airTemp').value = data.temperature;
+            }
+            if (typeof data.humidity === 'number') {
+                document.getElementById('humidity').value = data.humidity;
+            }
+        });
+    </script>
+</body>
+</html>

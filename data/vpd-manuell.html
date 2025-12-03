@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPD-Berechnung - Manuell</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004d99;
+            --background-dark: #222;
+            --background-medium: #333;
+            --background-light: #444;
+            --text-color: #ffffff;
+            --accent-color: #66b2ff;
+            --success-color: #4CAF50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .container {
+            background-color: var(--background-light);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--background-medium);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .optimal {
+            color: var(--success-color);
+        }
+        
+        .warning {
+            color: var(--warning-color);
+        }
+        
+        .danger {
+            color: var(--danger-color);
+        }
+        
+        .back-link {
+            margin-top: 30px;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 10px 15px;
+            background-color: var(--background-light);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .back-link:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VPD-Berechnung</h1>
+        <h2>Manuelle Eingabe</h2>
+    </div>
+    
+    <!-- Tag/Nacht-Umschalter für die manuelle VPD-Seite -->
+    <div class="section" style="margin-bottom: 20px; background-color: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--accent-color);">
+            <i class="fas fa-clock" style="margin-right: 8px;"></i> Tag/Nacht-Modus
+        </h4>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+            <div style="flex: 1; min-width: 200px;">
+                <div class="toggle-container" style="position: relative; width: 100%; height: 40px; border-radius: 20px; background-color: var(--background-medium); overflow: hidden;">
+                    <div id="toggle-background" style="position: absolute; top: 0; left: 0; width: 50%; height: 100%; background-color: rgba(76, 175, 80, 0.3); transition: transform 0.3s ease;"></div>
+                    
+                    <div style="position: relative; display: flex; width: 100%; height: 100%;">
+                        <button id="day-mode" class="toggle-btn" style="flex: 1; background: none; border: none; color: var(--text-color); font-weight: bold; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-sun" style="margin-right: 5px;"></i> Tag
+                        </button>
+                        <button id="night-mode" class="toggle-btn" style="flex: 1; background: none; border: none; color: var(--text-color); cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-moon" style="margin-right: 5px;"></i> Nacht
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="mode-info" style="flex: 2; min-width: 280px; padding: 10px 15px; border-radius: 5px; background-color: rgba(76, 175, 80, 0.1); border-left: 3px solid #4CAF50;">
+                <strong style="color: #4CAF50;"><i class="fas fa-sun"></i> Tag-Modus aktiv:</strong>
+                <span id="mode-description">Lampen an, höhere Temperaturen, niedrigere Luftfeuchtigkeit, Blatttemp. oft 1-3°C unter Lufttemp.</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <form id="vpdForm">
+            <div class="form-group">
+                <label for="airTemp"><i class="fas fa-thermometer-half"></i> Lufttemperatur (°C):</label>
+                <input type="number" id="airTemp" name="airTemp" step="0.1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="leafTemp"><i class="fas fa-leaf"></i> Blatttemperatur (°C):</label>
+                <input type="number" id="leafTemp" name="leafTemp" step="0.1" placeholder="Meist 1-3°C unter Lufttemperatur bei aktiven Lampen">
+                <div class="leaf-temp-note" style="margin-top: 5px; font-size: 0.9em; color: #aaa;">
+                    <i class="fas fa-sun"></i> Tagsüber: Blatttemperatur liegt durch Verdunstungskühlung oft 1-3°C unter der Lufttemperatur.
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="humidity"><i class="fas fa-tint"></i> Relative Luftfeuchtigkeit (%):</label>
+                <input type="number" id="humidity" name="humidity" step="0.1" required>
+            </div>
+            
+            <button type="submit">VPD berechnen</button>
+        </form>
+        
+        <div id="result" class="result">
+            <h3>Vapor Pressure Deficit (VPD):</h3>
+            <div id="vpdValue" class="result-value">0.00</div>
+            <div id="vpdInterpretation">Bitte geben Sie Werte ein.</div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background-color: var(--background-medium); border-radius: 8px;">
+            <h3>VPD-Richtwerte:</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: var(--background-light);">
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #555;">Wachstumsphase</th>
+                            <th style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">Tag VPD (kPa)</th>
+                            <th style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">Nacht VPD (kPa)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #555;">Keimung & Setzlinge</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">0.4 - 0.8</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">0.3 - 0.6</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #555;">Vegetatives Wachstum</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">0.8 - 1.2</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">0.6 - 1.0</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #555;">Spätes Wachstum</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">0.8 - 1.3</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">0.7 - 1.1</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #555;">Frühe Blüte</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">1.0 - 1.5</td>
+                            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #555;">0.8 - 1.2</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;">Späte Blüte</td>
+                            <td style="padding: 10px; text-align: center;">1.2 - 1.8</td>
+                            <td style="padding: 10px; text-align: center;">0.9 - 1.3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Zurück zur Übersicht</a>
+
+    <script>
+        // VPD-Berechnung
+        function calculateVPD(airTemp, leafTemp, humidity) {
+            // Sättigungsdampfdruck bei Lufttemperatur in kPa
+            const satVaporPressureAir = 0.6108 * Math.exp((17.27 * airTemp) / (airTemp + 237.3));
+            
+            // Sättigungsdampfdruck bei Blatttemperatur in kPa
+            const satVaporPressureLeaf = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+            
+            // Aktueller Dampfdruck in kPa
+            const actualVaporPressure = satVaporPressureAir * (humidity / 100);
+            
+            // VPD in kPa
+            const vpd = satVaporPressureLeaf - actualVaporPressure;
+            
+            return Math.max(0, vpd);
+        }
+        
+        // Standardwerte für Tag/Nacht
+        const dayDefaults = {
+            airTemp: 25,
+            leafTemp: 23,
+            humidity: 60,
+            description: "Lampen an, höhere Temperaturen, niedrigere Luftfeuchtigkeit, Blatttemp. oft 1-3°C unter Lufttemp.",
+            color: "#4CAF50",
+            bgColor: "rgba(76, 175, 80, 0.1)"
+        };
+        
+        const nightDefaults = {
+            airTemp: 20,
+            leafTemp: 20,
+            humidity: 70,
+            description: "Lampen aus, niedrigere Temperaturen, höhere Luftfeuchtigkeit, Blatttemp. etwa gleich der Lufttemp.",
+            color: "#9e77f1",
+            bgColor: "rgba(158, 119, 241, 0.1)"
+        };
+        
+        // Status für Tag/Nacht-Modus
+        let isDayMode = true;
+        
+        // Event-Listener für Tag-Button
+        document.getElementById('day-mode').addEventListener('click', function() {
+            if (!isDayMode) {
+                toggleMode(true);
+            }
+        });
+        
+        // Event-Listener für Nacht-Button
+        document.getElementById('night-mode').addEventListener('click', function() {
+            if (isDayMode) {
+                toggleMode(false);
+            }
+        });
+        
+        // Wechsel zwischen Tag und Nacht
+        function toggleMode(isDay) {
+            const toggleBg = document.getElementById('toggle-background');
+            const dayBtn = document.getElementById('day-mode');
+            const nightBtn = document.getElementById('night-mode');
+            const modeInfo = document.getElementById('mode-info');
+            const modeDescription = document.getElementById('mode-description');
+            
+            // Speichere aktuelle Werte, falls vorhanden
+            const currentAirTemp = document.getElementById('airTemp').value;
+            const currentLeafTemp = document.getElementById('leafTemp').value;
+            const currentHumidity = document.getElementById('humidity').value;
+            
+            // Entscheide, ob Standardwerte geladen werden sollen
+            const loadDefaults = 
+                (currentAirTemp === '' || 
+                 currentLeafTemp === '' || 
+                 currentHumidity === '' ||
+                 !document.getElementById('result').style.display || 
+                 document.getElementById('result').style.display === 'none');
+            
+            if (isDay) {
+                // Wechsel zum Tag-Modus
+                toggleBg.style.transform = 'translateX(0%)';
+                dayBtn.style.fontWeight = 'bold';
+                nightBtn.style.fontWeight = 'normal';
+                modeInfo.style.borderLeftColor = dayDefaults.color;
+                modeInfo.style.backgroundColor = dayDefaults.bgColor;
+                modeDescription.textContent = dayDefaults.description;
+                
+                // Update Icon und Farbe im Info-Bereich
+                const infoHeader = modeInfo.querySelector('strong');
+                if (infoHeader) {
+                    infoHeader.innerHTML = '<i class="fas fa-sun"></i> Tag-Modus aktiv:';
+                    infoHeader.style.color = dayDefaults.color;
+                }
+                
+                // Bei Bedarf Standardwerte für Tag laden
+                if (loadDefaults) {
+                    document.getElementById('airTemp').value = dayDefaults.airTemp;
+                    document.getElementById('leafTemp').value = dayDefaults.leafTemp;
+                    document.getElementById('humidity').value = dayDefaults.humidity;
+                }
+                
+            } else {
+                // Wechsel zum Nacht-Modus
+                toggleBg.style.transform = 'translateX(100%)';
+                dayBtn.style.fontWeight = 'normal';
+                nightBtn.style.fontWeight = 'bold';
+                modeInfo.style.borderLeftColor = nightDefaults.color;
+                modeInfo.style.backgroundColor = nightDefaults.bgColor;
+                modeDescription.textContent = nightDefaults.description;
+                
+                // Update Icon und Farbe im Info-Bereich
+                const infoHeader = modeInfo.querySelector('strong');
+                if (infoHeader) {
+                    infoHeader.innerHTML = '<i class="fas fa-moon"></i> Nacht-Modus aktiv:';
+                    infoHeader.style.color = nightDefaults.color;
+                }
+                
+                // Bei Bedarf Standardwerte für Nacht laden
+                if (loadDefaults) {
+                    document.getElementById('airTemp').value = nightDefaults.airTemp;
+                    document.getElementById('leafTemp').value = nightDefaults.leafTemp;
+                    document.getElementById('humidity').value = nightDefaults.humidity;
+                }
+            }
+            
+            // Status aktualisieren
+            isDayMode = isDay;
+            
+            // Anpasse die Blatttemperatur-Hinweise
+            updateLeafTempPlaceholder();
+            
+            // Falls bereits ein Ergebnis angezeigt wird, aktualisiere es
+            if (document.getElementById('result').style.display === 'block') {
+                document.getElementById('vpdForm').dispatchEvent(new Event('submit'));
+            }
+            
+            // Speichere den Tag/Nacht-Status
+            localStorage.setItem('manual-day-mode', isDay.toString());
+        }
+        
+        // Blatttemperatur-Platzhalter anpassen
+        function updateLeafTempPlaceholder() {
+            const leafTempInput = document.getElementById('leafTemp');
+            const leafTempNote = document.querySelector('.leaf-temp-note');
+            
+            if (isDayMode) {
+                leafTempInput.placeholder = "Meist 1-3°C unter Lufttemperatur bei aktiven Lampen";
+                if (leafTempNote) {
+                    leafTempNote.innerHTML = '<i class="fas fa-sun"></i> Tagsüber: Blatttemperatur liegt durch Verdunstungskühlung oft 1-3°C unter der Lufttemperatur.';
+                }
+            } else {
+                leafTempInput.placeholder = "Ohne Lampe nachts meist gleich der Lufttemperatur";
+                if (leafTempNote) {
+                    leafTempNote.innerHTML = '<i class="fas fa-moon"></i> Nachts: Blatttemperatur ist meist gleich der Lufttemperatur, da keine Wärme von Lampen einwirkt.';
+                }
+            }
+        }
+        
+        // Initialisierung
+        updateLeafTempPlaceholder();
+        
+        // Lade den gespeicherten Tag/Nacht-Status
+        if (localStorage.getItem('manual-day-mode') === 'false') {
+            // Wenn der letzte Status "Nacht" war, schalte auf Nacht um
+            toggleMode(false);
+        }
+        
+        document.getElementById('vpdForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const airTemp = parseFloat(document.getElementById('airTemp').value);
+            let leafTemp = parseFloat(document.getElementById('leafTemp').value);
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            
+            // Falls keine Blatttemperatur eingegeben, schätze sie basierend auf Tag/Nacht
+            if (isNaN(leafTemp)) {
+                if (isDayMode) {
+                    // Tagsüber ist die Blatttemperatur typischerweise 1-3°C unter der Lufttemperatur
+                    leafTemp = airTemp - 2;
+                } else {
+                    // Nachts ist die Blatttemperatur etwa gleich der Lufttemperatur
+                    leafTemp = airTemp;
+                }
+            }
+            
+            // Setze den aktuellen Wert, damit er angezeigt wird
+            document.getElementById('leafTemp').placeholder = leafTemp;
+            
+            const vpd = calculateVPD(airTemp, leafTemp, humidity);
+            
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('vpdValue').textContent = vpd.toFixed(2);
+            
+            // Interpretiere VPD-Wert
+            let interpretation = '';
+            let vpdClass = '';
+            
+            // Verwende angepasste Interpretation basierend auf Tag/Nacht
+            if (isDayMode) {
+                // Taginterpretation
+                if (vpd < 0.4) {
+                    interpretation = 'Zu niedrig: Erhöhtes Risiko für Pilzbefall und Krankheiten.';
+                    vpdClass = 'danger';
+                } else if (vpd >= 0.4 && vpd < 0.8) {
+                    interpretation = 'Niedrig: Geeignet für Stecklinge und junge Pflanzen.';
+                    vpdClass = 'warning';
+                } else if (vpd >= 0.8 && vpd <= 1.2) {
+                    interpretation = 'Optimal: Idealer Bereich für vegetatives Wachstum.';
+                    vpdClass = 'optimal';
+                } else if (vpd > 1.2 && vpd <= 1.8) {
+                    interpretation = 'Hoch: Geeignet für Blütephase.';
+                    vpdClass = 'warning';
+                } else {
+                    interpretation = 'Zu hoch: Risiko von Trockenstress, reduzierte Photosynthese.';
+                    vpdClass = 'danger';
+                }
+            } else {
+                // Nachtinterpretation
+                if (vpd < 0.3) {
+                    interpretation = 'Zu niedrig für die Nacht: Erhöhtes Schimmelrisiko.';
+                    vpdClass = 'danger';
+                } else if (vpd >= 0.3 && vpd < 0.6) {
+                    interpretation = 'Niedrig: Gut für junge Pflanzen in der Nacht.';
+                    vpdClass = 'warning';
+                } else if (vpd >= 0.6 && vpd <= 1.0) {
+                    interpretation = 'Optimal für die Nacht: Gute Balance für die meisten Pflanzen.';
+                    vpdClass = 'optimal';
+                } else if (vpd > 1.0 && vpd <= 1.2) {
+                    interpretation = 'Etwas hoch für die Nacht: Noch akzeptabel für die Blütephase.';
+                    vpdClass = 'warning';
+                } else {
+                    interpretation = 'Zu hoch für die Nacht: Risiko von Trockenstress.';
+                    vpdClass = 'danger';
+                }
+            }
+            
+            document.getElementById('vpdInterpretation').textContent = interpretation;
+            document.getElementById('vpdInterpretation').className = vpdClass;
+            document.getElementById('vpdValue').className = 'result-value ' + vpdClass;
+        });
+    </script>
+</body>
+</html> 

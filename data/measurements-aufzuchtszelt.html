@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messungshistorie - Aufzuchtszelt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004d99;
+            --background-dark: #222;
+            --background-medium: #333;
+            --background-light: #444;
+            --text-color: #ffffff;
+            --accent-color: #66b2ff;
+            --success-color: #4CAF50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .container {
+            background-color: var(--background-light);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--background-medium);
+        }
+        
+        th {
+            background-color: var(--background-medium);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: var(--background-medium);
+        }
+        
+        .back-link {
+            margin-top: 30px;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 10px 15px;
+            background-color: var(--background-light);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .back-link:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .time-range {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .time-range button {
+            background-color: var(--background-medium);
+            color: var(--text-color);
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .time-range button.active {
+            background-color: var(--primary-color);
+        }
+        
+        .time-range button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Messungshistorie</h1>
+        <h2>Aufzuchtszelt</h2>
+    </div>
+    
+    <div class="container">
+        <div id="loading-indicator" style="display: none; text-align: center; margin: 20px 0;">
+            <div style="display: inline-block; width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: var(--accent-color); animation: spin 1s ease-in-out infinite;"></div>
+            <p>Lade Daten...</p>
+        </div>
+        
+        <div id="error-message" style="display: none; color: var(--danger-color); background-color: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;"></div>
+        
+        <div class="controls">
+            <div class="time-range">
+                <button id="range-6h" class="active">6 Stunden</button>
+                <button id="range-24h">24 Stunden</button>
+                <button id="range-7d">7 Tage</button>
+                <button id="range-30d">30 Tage</button>
+            </div>
+            <button id="refresh-data"><i class="fas fa-sync-alt"></i> Aktualisieren</button>
+        </div>
+        
+        <h3>Letzte Messungen</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Zeitpunkt</th>
+                        <th>Temperatur (°C)</th>
+                        <th>Luftfeuchtigkeit (%)</th>
+                        <th>VPD (kPa) & Bewertung</th>
+                    </tr>
+                </thead>
+                <tbody id="measurementsTable">
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Lade Daten...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Zurück zur Hauptseite</a>
+    
+    <script>
+        // Neue vereinfachte Version ohne Chart
+        let timeRange = '6h'; // Ändere den Standard-Zeitbereich auf 6h
+        
+        // Funktion zum Laden der Daten
+        function loadData() {
+            // Aktuelles Datum und Endzeit
+            const endDate = new Date();
+            
+            // Startzeit basierend auf ausgewähltem Zeitraum
+            let startDate = new Date();
+            
+            switch(timeRange) {
+                case '24h':
+                    startDate.setTime(endDate.getTime() - 24 * 60 * 60 * 1000);
+                    break;
+                case '7d':
+                    startDate.setTime(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case '30d':
+                    startDate.setTime(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    break;
+                default: // 6h
+                    startDate.setTime(endDate.getTime() - 6 * 60 * 60 * 1000);
+            }
+            
+            // Verwende die neue Funktion mit dynamischen Intervallen
+            fetchSensorData(startDate, endDate);
+        }
+        
+        // Funktion zum Filtern der Daten nach Zeitbereich
+        function filterDataByTimeRange(data, range) {
+            const now = new Date();
+            let cutoffTime;
+            
+            switch(range) {
+                case '6h':
+                    cutoffTime = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+                    break;
+                case '24h':
+                    cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                    break;
+                case '7d':
+                    cutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case '30d':
+                    cutoffTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    break;
+                default:
+                    cutoffTime = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+            }
+            
+            return data.filter(item => new Date(item.timestamp) > cutoffTime);
+        }
+        
+        // Funktion zur Bestimmung des optimalen VPD-Bereichs
+        function getOptimalVPDRange(growthStage) {
+            switch(growthStage.toLowerCase()) {
+                case 'keimung':
+                    return '0.4 - 0.8 kPa';
+                case 'vegetativ':
+                    return '0.8 - 1.2 kPa';
+                case 'frühe blüte':
+                    return '1.0 - 1.5 kPa';
+                case 'blüte':
+                    return '1.2 - 1.8 kPa';
+                case 'späte blüte':
+                    return '1.0 - 1.5 kPa';
+                default:
+                    return '0.8 - 1.5 kPa'; // Allgemeiner optimaler Bereich
+            }
+        }
+        
+        // Aktualisiere die Tabelle mit VPD-Bereichen
+        function updateTable(data) {
+            const tableBody = document.getElementById('measurementsTable');
+            tableBody.innerHTML = '';
+            
+            // Sortiere Daten nach Zeitstempel (neueste zuerst)
+            const sortedData = [...data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            // Begrenze auf die letzten 20 Einträge
+            const limitedData = sortedData.slice(0, 20);
+            
+            if (limitedData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Keine Daten verfügbar</td></tr>';
+                return;
+            }
+            
+            // Angenommene aktuelle Wachstumsphase (für Aufzuchtszelt, in der Regel vegetativ)
+            const currentGrowthStage = 'Vegetativ'; // Für Aufzuchtszelt ist "Vegetativ" typisch
+            const optimalVPDRange = getOptimalVPDRange(currentGrowthStage);
+            
+            limitedData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Korrigiere die Zeitformatierung, um die richtige Zeit anzuzeigen
+                const date = new Date(item.timestamp);
+                // Korrigiere die Zeit um eine Stunde nach vorne (nicht zurück)
+                const correctedDate = new Date(date.getTime() + 60 * 60 * 1000);
+                const formattedDate = correctedDate.toLocaleString('de-DE', {
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                
+                // VPD berechnen
+                let vpd = '-';
+                let vpdStatus = '';
+                if (item.temperature !== null && item.humidity !== null) {
+                    const vpdValue = calculateVPD(item.temperature, item.humidity);
+                    vpd = vpdValue.toFixed(2);
+                    
+                    // VPD-Status bestimmen (zu niedrig, optimal, zu hoch)
+                    if (currentGrowthStage === 'Vegetativ') {
+                        if (vpdValue < 0.8) {
+                            vpdStatus = '<span style="color: #ff9800;">Zu niedrig</span>';
+                        } else if (vpdValue > 1.2) {
+                            vpdStatus = '<span style="color: #f44336;">Zu hoch</span>';
+                        } else {
+                            vpdStatus = '<span style="color: #4CAF50;">Optimal</span>';
+                        }
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${item.temperature !== null ? item.temperature.toFixed(1) : '-'}</td>
+                    <td>${item.humidity !== null ? item.humidity.toFixed(1) : '-'}</td>
+                    <td>
+                        ${vpd} kPa
+                        <br>
+                        <small style="display: block; margin-top: 5px; padding: 3px; background-color: rgba(0,0,0,0.2); border-radius: 3px;">
+                            <strong>Optimaler Bereich (${currentGrowthStage}):</strong> ${optimalVPDRange}
+                            <br>
+                            <strong>Status:</strong> ${vpdStatus}
+                        </small>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Funktion zur Berechnung des VPD
+        function calculateVPD(airTemp, humidity) {
+            // Blatttemperatur etwa 1-2°C höher als Lufttemperatur (typisch für Indoor-Anlagen)
+            const leafTemp = airTemp + 1.5;
+            
+            // Sättigungsdampfdruck bei Lufttemperatur (kPa)
+            const svpAir = 0.6108 * Math.exp((17.27 * airTemp) / (airTemp + 237.3));
+            
+            // Sättigungsdampfdruck bei Blatttemperatur (kPa)
+            const svpLeaf = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+            
+            // Aktueller Dampfdruck (kPa)
+            const vpAir = svpAir * (humidity / 100);
+            
+            // VPD (kPa)
+            const vpd = svpLeaf - vpAir;
+            
+            return Math.max(0, vpd); // VPD kann nicht negativ sein
+        }
+        
+        // Event-Listener für Zeitbereich-Buttons
+        document.querySelectorAll('.time-range button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Aktiven Button markieren
+                document.querySelectorAll('.time-range button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Zeitbereich aktualisieren und Daten neu laden
+                timeRange = this.id.replace('range-', '');
+                loadData();
+            });
+        });
+        
+        // Event-Listener für Aktualisieren-Button
+        document.getElementById('refresh-data').addEventListener('click', loadData);
+        
+        // Daten beim Laden der Seite laden
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        // Durch diesen Code mit sicherer Überprüfung:
+        const vpdInfoElement = document.querySelector('.vpd-info-container');
+        if (vpdInfoElement) {
+            vpdInfoElement.remove();
+        }
+
+        // Ersetze die bestehende sampleDataByInterval-Funktion mit dieser Version
+        function sampleDataByInterval(data, timeRange) {
+            // Wenn weniger als 10 Datenpunkte vorhanden sind, alle anzeigen
+            if (data.length <= 10) return data;
+            
+            // 5-Minuten-Gruppen erstellen
+            const groupedData = {};
+            const fiveMinutes = 5 * 60 * 1000; // 5 Minuten in Millisekunden
+            
+            // Daten nach 5-Minuten-Intervallen gruppieren
+            data.forEach(item => {
+                const timestamp = new Date(item.timestamp);
+                // Runde auf 5-Minuten-Intervalle ab
+                const intervalKey = Math.floor(timestamp.getTime() / fiveMinutes) * fiveMinutes;
+                
+                // Wenn es noch keine Gruppe für dieses Intervall gibt, erstelle eine
+                if (!groupedData[intervalKey]) {
+                    groupedData[intervalKey] = {
+                        timestamp: item.timestamp,
+                        temperature: item.temperature,
+                        humidity: item.humidity,
+                        count: 1
+                    };
+                } else {
+                    // Wenn bereits Daten für dieses Intervall existieren, Werte mitteln
+                    groupedData[intervalKey].temperature = (groupedData[intervalKey].temperature * groupedData[intervalKey].count + item.temperature) / (groupedData[intervalKey].count + 1);
+                    groupedData[intervalKey].humidity = (groupedData[intervalKey].humidity * groupedData[intervalKey].count + item.humidity) / (groupedData[intervalKey].count + 1);
+                    groupedData[intervalKey].count += 1;
+                }
+            });
+            
+            // Konvertiere die gruppierten Daten zurück in ein Array
+            const sampledData = Object.values(groupedData).map(group => ({
+                timestamp: group.timestamp,
+                temperature: group.temperature,
+                humidity: group.humidity
+            }));
+            
+            // Sortiere nach Zeitstempel (neueste zuerst)
+            sampledData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            console.log(`Originaldaten: ${data.length}, Gesampelt in 5-Minuten-Intervallen: ${sampledData.length}`);
+            
+            return sampledData;
+        }
+
+        // Und dann aktualisiere die fetchSensorData-Funktion
+        function fetchSensorData(startDate, endDate) {
+            // Bestehender Code...
+            
+            // Definiere loadingIndicator hier, damit es überall verfügbar ist
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'block';
+            }
+
+            // Da der neue API-Endpunkt noch nicht funktioniert, 
+            // verwenden wir direkt den Fallback zum alten API-Endpunkt
+            console.log("Verwende alte API mit clientseitigem Sampling...");
+            fetch('/api/measurements/aufzuchtszelt')
+                .then(response => response.json())
+                .then(data => {
+                    // Filtere die Daten nach Zeitbereich
+                    const filteredData = filterDataByTimeRange(data, timeRange);
+                    
+                    // Anwenden des Samplings für größere Zeiträume
+                    const sampledData = sampleDataByInterval(filteredData, timeRange);
+                    
+                    // Aktualisiere die Tabelle mit den gesampelten Daten
+                    updateTable(sampledData);
+                    
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler beim Abrufen der Sensordaten:', error);
+                    
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                    
+                    const errorMessage = document.getElementById('error-message');
+                    if (errorMessage) {
+                        errorMessage.textContent = 'Fehler beim Laden der Daten. Bitte versuchen Sie es später erneut.';
+                        errorMessage.style.display = 'block';
+                    }
+                });
+        }
+
+        // Lösche oder korrigiere den VPD-Info-Container Selector (der vermutlich nicht existiert)
+        // Verwende stattdessen einen spezifischeren Selector
+        document.addEventListener('DOMContentLoaded', function() {
+            // Entferne die VPD-Info, die direkt nach dem h3-Element "Letzte Messungen" kommt
+            const h3Element = document.querySelector('h3');
+            if (h3Element && h3Element.textContent === 'Letzte Messungen') {
+                const infoBox = h3Element.nextElementSibling;
+                if (infoBox && infoBox.querySelector('h4') && 
+                    infoBox.querySelector('h4').textContent.includes('Optimale VPD-Werte')) {
+                    infoBox.remove();
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

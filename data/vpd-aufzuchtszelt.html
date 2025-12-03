@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPD-Berechnung - Aufzuchtszelt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004d99;
+            --background-dark: #222;
+            --background-medium: #333;
+            --background-light: #444;
+            --text-color: #ffffff;
+            --accent-color: #66b2ff;
+            --success-color: #4CAF50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .container {
+            background-color: var(--background-light);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--background-medium);
+            border-radius: 8px;
+        }
+        
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .optimal {
+            color: var(--success-color);
+        }
+        
+        .warning {
+            color: var(--warning-color);
+        }
+        
+        .danger {
+            color: var(--danger-color);
+        }
+        
+        .back-link {
+            margin-top: 30px;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 10px 15px;
+            background-color: var(--background-light);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .back-link:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .indicator {
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+        }
+        .day-indicator {
+            background-color: #ffcc00; /* Gelb für Tag */
+            box-shadow: 0 0 5px 2px rgba(255, 204, 0, 0.5);
+        }
+        .night-indicator {
+            background-color: #6e7fff; /* Blau für Nacht */
+            box-shadow: 0 0 5px 2px rgba(110, 127, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VPD-Berechnung</h1>
+        <h2>Aufzuchtszelt</h2>
+    </div>
+    
+    <div class="container">
+        <form id="vpdForm">
+            <div class="form-group">
+                <label for="airTemp"><i class="fas fa-thermometer-half"></i> Lufttemperatur (°C):</label>
+                <input type="number" id="airTemp" name="airTemp" step="0.1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="leafTemp"><i class="fas fa-leaf"></i> Blatttemperatur (°C):</label>
+                <input type="number" id="leafTemp" name="leafTemp" step="0.1" placeholder="Meist 1-3°C unter Lufttemperatur bei aktiven Lampen">
+                <div class="leaf-temp-note" style="margin-top: 5px; font-size: 0.9em; color: #aaa;">
+                    <i class="fas fa-sun"></i> Tagsüber: Blatttemperatur liegt durch Verdunstungskühlung oft 1-3°C unter der Lufttemperatur.
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="humidity"><i class="fas fa-tint"></i> Relative Luftfeuchtigkeit (%):</label>
+                <input type="number" id="humidity" name="humidity" step="0.1" required>
+            </div>
+            
+            <button type="submit"><i class="fas fa-calculator"></i> VPD berechnen</button>
+        </form>
+        
+        <div class="result" id="result" style="display: none;">
+            <h3>Ergebnis:</h3>
+            <p>VPD: <span id="vpdValue" class="result-value">0.0</span> kPa</p>
+            <p id="vpdInterpretation"></p>
+        </div>
+    </div>
+    
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Zurück zur Hauptseite</a>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // Socket.IO-Verbindung herstellen
+        const socket = io();
+        
+        // VPD-Berechnung mit Tag/Nacht-Berücksichtigung
+        document.getElementById('vpdForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const airTemp = parseFloat(document.getElementById('airTemp').value);
+            let leafTemp = document.getElementById('leafTemp').value;
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            
+            // Überprüfe, ob wir einen Tag/Nacht-Status haben
+            const isDaytime = document.getElementById('daytime-status') && 
+                              document.getElementById('daytime-status').textContent.includes('Tagphase');
+            
+            // Automatische Blatttemperatur-Anpassung, wenn keine manuelle Eingabe
+            if (!leafTemp || leafTemp.trim() === '') {
+                if (isDaytime) {
+                    // Bei Tag: Blatttemperatur = Lufttemperatur + 1°C (wärmer als Umgebung)
+                    leafTemp = airTemp + 1.0;
+                } else {
+                    // Bei Nacht: Blatttemperatur ≈ Lufttemperatur (nur minimal reduziert)
+                    leafTemp = airTemp - 0.2; // Nur leicht unter Lufttemperatur
+                }
+                
+                // Aktualisiere das Eingabefeld
+                document.getElementById('leafTemp').value = leafTemp.toFixed(1);
+            } else {
+                // Konvertiere zu Zahl, falls manuell eingegeben
+                leafTemp = parseFloat(leafTemp);
+            }
+            
+            // Berechnung des VPD-Werts mit der korrekten Formel
+            const vpd = calculateVPD(airTemp, leafTemp, humidity);
+            
+            // Ergebnisse anzeigen
+            document.getElementById('vpdValue').textContent = vpd.toFixed(2);
+            
+            // VPD-Interpretation basierend auf Tag/Nacht und Wachstumsphase
+            const vpdInterpretation = document.getElementById('vpdInterpretation');
+            const vpdValueClass = document.getElementById('vpdValue').classList;
+            
+            vpdValueClass.remove('optimal', 'warning', 'danger');
+            
+            // Andere Optimalwerte für Aufzuchtszelt (vegetative Phase)
+            let optimalRange;
+            if (isDaytime) {
+                // Optimale Bereiche für Tag
+                optimalRange = { min: 0.7, max: 1.1 }; // Für vegetatives Wachstum
+            } else {
+                // Optimale Bereiche für Nacht
+                optimalRange = { min: 0.3, max: 0.6 }; // Für Nacht (niedriger VPD)
+            }
+            
+            // Bewertung des VPD-Werts
+            if (vpd >= optimalRange.min && vpd <= optimalRange.max) {
+                vpdInterpretation.textContent = `Optimal für ${isDaytime ? 'Tagphase' : 'Nachtphase'} (${optimalRange.min} - ${optimalRange.max} kPa)`;
+                vpdValueClass.add('optimal');
+            } else if (vpd < optimalRange.min) {
+                vpdInterpretation.textContent = `Zu niedrig für ${isDaytime ? 'Tagphase' : 'Nachtphase'} (unter ${optimalRange.min} kPa)`;
+                vpdValueClass.add('warning');
+            } else {
+                vpdInterpretation.textContent = `Zu hoch für ${isDaytime ? 'Tagphase' : 'Nachtphase'} (über ${optimalRange.max} kPa)`;
+                vpdValueClass.add('warning');
+            }
+            
+            // Zusatzinformationen basierend auf Tag/Nacht und Wachstumsphase
+            let additionalInfo = "";
+            if (isDaytime) {
+                if (vpd > 1.3) {
+                    additionalInfo = "ACHTUNG: Hoher VPD kann das vegetative Wachstum hemmen. Erhöhe die Luftfeuchtigkeit für besseres Blattwachstum.";
+                }
+            } else {
+                if (vpd < 0.2) {
+                    additionalInfo = "ACHTUNG: Sehr niedriger VPD nachts erhöht Pilz- und Schimmelrisiko. Kontrolliere die Belüftung.";
+                }
+            }
+            
+            if (additionalInfo) {
+                vpdInterpretation.innerHTML += `<br><span style="color: var(--warning-color);">${additionalInfo}</span>`;
+            }
+            
+            // Zeige Ergebnisbereich
+            document.getElementById('result').style.display = 'block';
+        });
+        
+        // Tag/Nacht-Status abrufen mit korrektem Zonennamen
+        function checkDaytimeStatus() {
+            fetch('/api/vpd-status?zone=aufzuchtszelt')
+                .then(response => response.json())
+                .then(data => {
+                    const isDaytime = data.is_daytime;
+                    
+                    // VPD-Zielwerte je nach Tag/Nacht anpassen - für Wachstumsphase andere Optimalwerte
+                    const vpdTarget = document.getElementById('vpd-target');
+                    if (vpdTarget) {
+                        if (isDaytime) {
+                            vpdTarget.textContent = "0.7 - 1.1 kPa"; // Ideal für vegetatives Wachstum am Tag
+                        } else {
+                            vpdTarget.textContent = "0.3 - 0.6 kPa"; // Niedriger für Nacht
+                        }
+                    }
+                    
+                    // Visuelles Feedback
+                    const daytimeStatus = document.getElementById('daytime-status');
+                    const daytimeIndicator = document.getElementById('daytime-indicator');
+                    
+                    if (daytimeStatus) {
+                        daytimeStatus.textContent = isDaytime ? "Tagphase (Licht an)" : "Nachtphase (Licht aus)";
+                    }
+                    
+                    if (daytimeIndicator) {
+                        daytimeIndicator.className = isDaytime ? "indicator day-indicator" : "indicator night-indicator";
+                    }
+                    
+                    // Automatisch Tag/Nacht-Modus umschalten
+                    updateDayNightDisplay(!isDaytime);
+                })
+                .catch(error => console.error('Fehler beim Abrufen des Tagzeit-Status:', error));
+        }
+        
+        // Initial und dann alle 5 Minuten aktualisieren
+        checkDaytimeStatus();
+        setInterval(checkDaytimeStatus, 300000);
+        
+        // Funktion zur Berechnung des VPD
+        function calculateVPD(airTemp, leafTemp, humidity) {
+            // Sättigungsdampfdruck bei Lufttemperatur (kPa)
+            const svpAir = 0.6108 * Math.exp((17.27 * airTemp) / (airTemp + 237.3));
+            
+            // Sättigungsdampfdruck bei Blatttemperatur (kPa)
+            const svpLeaf = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+            
+            // Aktueller Dampfdruck (kPa)
+            const vpAir = svpAir * (humidity / 100);
+            
+            // VPD (kPa)
+            const vpd = svpLeaf - vpAir;
+            
+            return Math.max(0, vpd); // VPD kann nicht negativ sein
+        }
+        
+        // Wenn vom Server das Event "updateHumiditySensor2" (Aufzuchtszelt) kommt, Felder auffüllen
+        socket.on('updateHumiditySensor2', (data) => {
+            console.log('updateHumiditySensor2 (Aufzuchtszelt):', data);
+
+            // data = { temperature: xx, humidity: yy, ... }
+            if (typeof data.temperature === 'number') {
+                document.getElementById('airTemp').value = data.temperature;
+            }
+            if (typeof data.humidity === 'number') {
+                document.getElementById('humidity').value = data.humidity;
+            }
+            
+            // Automatisch Berechnung triggern
+            document.getElementById('vpdForm').dispatchEvent(new Event('submit'));
+        });
+        
+        // Anpasse die Blatttemperatur basierend auf Tag/Nacht
+        function adjustLeafTempPlaceholder() {
+            const isNight = document.getElementById('night-values').style.display === 'block';
+            const leafTempInput = document.getElementById('leafTemp');
+            
+            if (isNight) {
+                // Nachts ist die Blatttemperatur etwa gleich der Lufttemperatur oder leicht darunter
+                leafTempInput.placeholder = "Ohne Lampe nachts meist gleich der Lufttemperatur";
+                
+                // Ändere den Hinweistext zur Blatttemperatur
+                const leafTempNote = document.querySelector('.leaf-temp-note');
+                if (leafTempNote) {
+                    leafTempNote.innerHTML = '<i class="fas fa-moon"></i> Nachts: Blatttemperatur ist meist gleich der Lufttemperatur, da keine Wärme von Lampen einwirkt.';
+                }
+            } else {
+                // Tagsüber ist die Blatttemperatur oft unter der Lufttemperatur
+                leafTempInput.placeholder = "Meist 1-3°C unter Lufttemperatur bei aktiven Lampen";
+                
+                // Ändere den Hinweistext zur Blatttemperatur
+                const leafTempNote = document.querySelector('.leaf-temp-note');
+                if (leafTempNote) {
+                    leafTempNote.innerHTML = '<i class="fas fa-sun"></i> Tagsüber: Blatttemperatur liegt durch Verdunstungskühlung oft 1-3°C unter der Lufttemperatur.';
+                }
+            }
+        }
+    </script>
+    
+    <!-- Tag/Nacht-Umschalter und Zeiteinstellung für das Aufzuchtszelt -->
+    <div class="vpd-info-box" style="background-color: var(--background-medium); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid var(--accent-color);">
+        <h3 style="margin-top: 0; color: var(--accent-color);">Optimale VPD-Werte für Vegetative Phase</h3>
+        
+        <!-- Tag/Nacht-Umschalter mit Zeiteinstellung -->
+        <div style="margin-bottom: 15px; background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                    <strong>Tageszeit:</strong> 
+                    <span id="current-time-status">Tag/Nacht wird geprüft...</span>
+                </div>
+                <div>
+                    <button id="toggle-day-night" class="tag-nacht-btn" style="background-color: var(--primary-color); padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                        Manuell umschalten
+                    </button>
+                    <button id="show-time-settings" style="background-color: var(--background-light); padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-cog"></i> Nachtzeiten
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Einstellungsbereich für Nachtzeiten (versteckt) -->
+            <div id="night-time-settings" style="display: none; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; margin-top: 10px;">
+                <h4 style="margin-top: 0; margin-bottom: 15px;">Nachtzeiten einstellen:</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="night-start" style="display: block; margin-bottom: 5px;">Nacht beginnt um:</label>
+                        <input type="time" id="night-start" style="width: 100%; padding: 8px; background-color: var(--background-dark); color: var(--text-color); border: 1px solid #555; border-radius: 4px;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="night-end" style="display: block; margin-bottom: 5px;">Nacht endet um:</label>
+                        <input type="time" id="night-end" style="width: 100%; padding: 8px; background-color: var(--background-dark); color: var(--text-color); border: 1px solid #555; border-radius: 4px;">
+                    </div>
+                </div>
+                <button id="save-night-times" style="background-color: var(--success-color); padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px;">
+                    Speichern
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tageswerte -->
+        <div id="day-values">
+            <h4 style="color: var(--accent-color);">Tagwerte für vegetative Phase</h4>
+            <div class="vpd-stages">
+                <div class="vpd-stage">
+                    <h4>Keimung & Setzlinge</h4>
+                    <div class="vpd-value">0.4 - 0.8 kPa</div>
+                    <p>Junge Pflanzen benötigen niedrigere VPD-Werte, um Stress zu vermeiden und die Wurzelbildung zu fördern.</p>
+                </div>
+                
+                <div class="vpd-stage" style="background-color: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #4CAF50;">
+                    <h4>Vegetatives Wachstum (aktuelle Phase)</h4>
+                    <div class="vpd-value" style="font-size: 1.2em; font-weight: bold; color: #4CAF50;">0.8 - 1.2 kPa</div>
+                    <p>Die Hauptwachstumsphase benötigt ausgewogene VPD-Werte für optimale Blattentwicklung und gesundes Wachstum.</p>
+                </div>
+                
+                <div class="vpd-stage">
+                    <h4>Spätvegetative Phase</h4>
+                    <div class="vpd-value">0.8 - 1.3 kPa</div>
+                    <p>Beim Übergang zur Blütephase kann der VPD leicht erhöht werden, um die Pflanze auf die kommende Phase vorzubereiten.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nachtwerte -->
+        <div id="night-values" style="display: none;">
+            <h4 style="color: #9e77f1;">Nachtwerte für vegetative Phase</h4>
+            <div class="vpd-stages">
+                <div class="vpd-stage">
+                    <h4>Keimung & Setzlinge</h4>
+                    <div class="vpd-value">0.3 - 0.6 kPa</div>
+                    <p>Während der Nacht benötigen Setzlinge niedrigere VPD-Werte, um Stress zu vermeiden.</p>
+                </div>
+                
+                <div class="vpd-stage" style="background-color: rgba(158, 119, 241,.1); padding: 10px; border-radius: 5px; border-left: 3px solid #9e77f1;">
+                    <h4>Vegetatives Wachstum (aktuelle Phase)</h4>
+                    <div class="vpd-value" style="font-size: 1.2em; font-weight: bold; color: #9e77f1;">0.6 - 1.0 kPa</div>
+                    <p>Eine moderate Temperaturdifferenz von 2-4°C zwischen Tag und Nacht fördert gesundes Wachstum.</p>
+                </div>
+                
+                <div class="vpd-stage">
+                    <h4>Spätvegetative Phase</h4>
+                    <div class="vpd-value">0.7 - 1.1 kPa</div>
+                    <p>Leicht erhöhte nächtliche VPD-Werte helfen bei der Vorbereitung auf die Blütephase.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="vpd-tips" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <h4>Tipps zur VPD-Optimierung über Tag und Nacht:</h4>
+            <ul>
+                <li>Halte die Luftfeuchtigkeit während des vegetativen Wachstums bei 55-70% am Tag</li>
+                <li>Nachts sollte die Luftfeuchtigkeit etwas höher sein (60-75%)</li>
+                <li>Ideale Temperatur nachts: 2-4°C kühler als tagsüber (18-22°C)</li>
+                <li>Nachts kann die Luftzirkulation etwas reduziert werden</li>
+                <li>Verwende Luftbefeuchter für junge Pflanzen und Setzlinge besonders in der Nacht</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Wachstumsphase-Auswahl für das Aufzuchtszelt -->
+    <div style="margin-bottom: 20px; background-color: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border-left: 4px solid var(--accent-color);">
+        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--accent-color); display: flex; align-items: center;">
+            <i class="fas fa-seedling" style="margin-right: 8px;"></i> Aktuelle Wachstumsphase
+        </h4>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 15px;">
+            <button id="phase-keimling" class="phase-button" style="flex: 1; padding: 10px 15px; border-radius: 5px; border: none; background-color: rgba(102, 178, 255, 0.2); color: #66b2ff; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 120px; transition: all 0.2s ease;">
+                <i class="fas fa-baby" style="margin-right: 6px;"></i> Keimling
+            </button>
+            
+            <button id="phase-setzling" class="phase-button" style="flex: 1; padding: 10px 15px; border-radius: 5px; border: none; background-color: rgba(102, 178, 255, 0.2); color: #66b2ff; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 120px; transition: all 0.2s ease;">
+                <i class="fas fa-child" style="margin-right: 6px;"></i> Setzling
+            </button>
+            
+            <button id="phase-vegetativ" class="phase-button" style="flex: 1; padding: 10px 15px; border-radius: 5px; border: none; background-color: rgba(76, 175, 80, 0.3); color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 120px; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);">
+                <i class="fas fa-leaf" style="margin-right: 6px;"></i> Vegetativ
+            </button>
+            
+            <button id="phase-vorblute" class="phase-button" style="flex: 1; padding: 10px 15px; border-radius: 5px; border: none; background-color: rgba(255, 152, 0, 0.2); color: #ff9800; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 120px; transition: all 0.2s ease;">
+                <i class="fas fa-arrow-right" style="margin-right: 6px;"></i> Vorblüte
+            </button>
+        </div>
+        
+        <div id="phase-description" style="background-color: rgba(76, 175, 80, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #4CAF50;">
+            <strong style="color: #4CAF50;">Vegetative Phase:</strong> Hauptwachstumsphase mit starker Blattentwicklung und strukturellem Wachstum. Benötigt ausgewogene VPD-Werte für optimale Entwicklung.
+        </div>
+    </div>
+    
+    <!-- JavaScript für Tag/Nacht-Wechsel und Zeiteinstellungen -->
+    <script>
+        // Standardzeiten (können vom Benutzer angepasst werden)
+        let nightStartTime = localStorage.getItem('aufzucht-night-start') || '22:00';
+        let nightEndTime = localStorage.getItem('aufzucht-night-end') || '06:00';
+        
+        // Initialisiere die Zeitauswahlfelder
+        document.getElementById('night-start').value = nightStartTime;
+        document.getElementById('night-end').value = nightEndTime;
+        
+        // Anzeigen/Verstecken der Zeiteinstellungen
+        document.getElementById('show-time-settings').addEventListener('click', function() {
+            const settingsDiv = document.getElementById('night-time-settings');
+            if (settingsDiv.style.display === 'none') {
+                settingsDiv.style.display = 'block';
+            } else {
+                settingsDiv.style.display = 'none';
+            }
+        });
+        
+        // Speichern der Nachtzeiten
+        document.getElementById('save-night-times').addEventListener('click', function() {
+            nightStartTime = document.getElementById('night-start').value;
+            nightEndTime = document.getElementById('night-end').value;
+            
+            // Speichern in localStorage
+            localStorage.setItem('aufzucht-night-start', nightStartTime);
+            localStorage.setItem('aufzucht-night-end', nightEndTime);
+            
+            // Einstellungen ausblenden und Status aktualisieren
+            document.getElementById('night-time-settings').style.display = 'none';
+            checkDayNightCycle();
+            
+            // Feedback für den Benutzer
+            alert('Nachtzeiten wurden gespeichert! (' + nightStartTime + ' - ' + nightEndTime + ')');
+        });
+        
+        function checkDayNightCycle() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentTime = hours * 60 + minutes; // Zeit in Minuten seit Mitternacht
+            
+            // Wandle die gespeicherten Zeiten in Minuten seit Mitternacht um
+            const [startHours, startMinutes] = nightStartTime.split(':').map(Number);
+            const [endHours, endMinutes] = nightEndTime.split(':').map(Number);
+            const nightStart = startHours * 60 + startMinutes;
+            const nightEnd = endHours * 60 + endMinutes;
+            
+            let isNighttime;
+            
+            // Prüfe, ob aktuelle Zeit zwischen Start und Ende liegt
+            if (nightStart > nightEnd) {
+                // Fall, wenn Nacht über Mitternacht geht (z.B. 22:00 - 06:00)
+                isNighttime = currentTime >= nightStart || currentTime < nightEnd;
+            } else {
+                // Fall, wenn Nacht in einem Tag liegt (z.B. 18:00 - 23:00)
+                isNighttime = currentTime >= nightStart && currentTime < nightEnd;
+            }
+            
+            updateDayNightDisplay(isNighttime);
+            return isNighttime;
+        }
+        
+        function updateDayNightDisplay(isNight) {
+            const dayValues = document.getElementById('day-values');
+            const nightValues = document.getElementById('night-values');
+            const statusText = document.getElementById('current-time-status');
+            
+            if (isNight) {
+                dayValues.style.display = 'none';
+                nightValues.style.display = 'block';
+                statusText.textContent = 'Nachtphase (' + nightStartTime + ' - ' + nightEndTime + ')';
+                statusText.style.color = '#9e77f1';
+            } else {
+                dayValues.style.display = 'block';
+                nightValues.style.display = 'none';
+                statusText.textContent = 'Tagphase (' + nightEndTime + ' - ' + nightStartTime + ')';
+                statusText.style.color = '#4CAF50';
+            }
+        }
+        
+        // Initialer Check
+        const isNight = checkDayNightCycle();
+        
+        // Erlaube manuelles Umschalten
+        document.getElementById('toggle-day-night').addEventListener('click', function() {
+            const dayValues = document.getElementById('day-values');
+            const isCurrentlyDay = dayValues.style.display !== 'none';
+            updateDayNightDisplay(!isCurrentlyDay);
+        });
+        
+        // Check alle Minute aktualisieren
+        setInterval(checkDayNightCycle, 60000);
+        
+        // Füge einen Listener für den Tag/Nacht-Umschalter hinzu
+        document.getElementById('toggle-day-night').addEventListener('click', adjustLeafTempPlaceholder);
+        
+        // Und auch einen für die Nachtzeit-Einstellungen
+        document.getElementById('save-night-times').addEventListener('click', adjustLeafTempPlaceholder);
+        
+        // Initialer Aufruf
+        adjustLeafTempPlaceholder();
+    </script>
+    
+    <!-- JavaScript für die Phasenauswahl -->
+    <script>
+        // Speichere die aktuelle Phase im localStorage
+        let currentGrowthPhase = localStorage.getItem('growth-phase') || 'vegetativ';
+        
+        // Phasen-Beschreibungen
+        const phaseDescriptions = {
+            'keimling': {
+                text: '<strong style="color: #66b2ff;">Keimphase:</strong> Sehr empfindliche Phase, in der die Samen keimen und erste Blätter entwickeln. Höhere Luftfeuchtigkeit und niedrige VPD-Werte sind entscheidend.',
+                color: '#66b2ff',
+                vpd_day: { min: 0.3, max: 0.6 },
+                vpd_night: { min: 0.2, max: 0.5 }
+            },
+            'setzling': {
+                text: '<strong style="color: #66b2ff;">Setzlingsphase:</strong> Junge Pflanzen mit ersten richtigen Blättern. Benötigen etwas höhere VPD-Werte als Keimlinge, aber immer noch hohe Luftfeuchtigkeit.',
+                color: '#66b2ff',
+                vpd_day: { min: 0.4, max: 0.8 },
+                vpd_night: { min: 0.3, max: 0.6 }
+            },
+            'vegetativ': {
+                text: '<strong style="color: #4CAF50;">Vegetative Phase:</strong> Hauptwachstumsphase mit starker Blattentwicklung und strukturellem Wachstum. Benötigt ausgewogene VPD-Werte für optimale Entwicklung.',
+                color: '#4CAF50',
+                vpd_day: { min: 0.8, max: 1.2 },
+                vpd_night: { min: 0.6, max: 1.0 }
+            },
+            'vorblute': {
+                text: '<strong style="color: #ff9800;">Vorblütephase:</strong> Übergangsphase zur Blüte. Höhere VPD-Werte fördern die Vorbereitung auf die Blüte und stärken die Struktur der Pflanze.',
+                color: '#ff9800',
+                vpd_day: { min: 0.8, max: 1.3 },
+                vpd_night: { min: 0.7, max: 1.1 }
+            }
+        };
+        
+        // Initialisiere die Buttons und markiere den aktiven
+        function updatePhaseButtons() {
+            // Alle Buttons zurücksetzen
+            document.querySelectorAll('.phase-button').forEach(button => {
+                const phaseId = button.id.split('-')[1];
+                button.style.backgroundColor = phaseDescriptions[phaseId] ? `rgba(${hexToRgb(phaseDescriptions[phaseId].color)}, 0.2)` : '';
+                button.style.color = phaseDescriptions[phaseId] ? phaseDescriptions[phaseId].color : '';
+                button.style.boxShadow = 'none';
+                button.style.fontWeight = 'normal';
+            });
+            
+            // Aktiven Button hervorheben
+            const activeButton = document.getElementById(`phase-${currentGrowthPhase}`);
+            if (activeButton) {
+                activeButton.style.backgroundColor = phaseDescriptions[currentGrowthPhase] ? `rgba(${hexToRgb(phaseDescriptions[currentGrowthPhase].color)}, 0.3)` : '';
+                activeButton.style.color = 'var(--text-color)';
+                activeButton.style.boxShadow = `0 0 10px rgba(${hexToRgb(phaseDescriptions[currentGrowthPhase].color)}, 0.5)`;
+                activeButton.style.fontWeight = 'bold';
+            }
+            
+            // Beschreibung aktualisieren
+            const descriptionDiv = document.getElementById('phase-description');
+            descriptionDiv.innerHTML = phaseDescriptions[currentGrowthPhase].text;
+            descriptionDiv.style.borderLeftColor = phaseDescriptions[currentGrowthPhase].color;
+            descriptionDiv.style.backgroundColor = `rgba(${hexToRgb(phaseDescriptions[currentGrowthPhase].color)}, 0.1)`;
+            
+            // Hervorhebe die entsprechende Phase in den VPD-Tabellen
+            highlightGrowthPhase(currentGrowthPhase);
+        }
+        
+        // Hilfsfunktion: Konvertiere Hex zu RGB für Transparenz
+        function hexToRgb(hex) {
+            // Entferne # wenn vorhanden
+            hex = hex.replace('#', '');
+            
+            // Konvertiere zu RGB
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            
+            return `${r}, ${g}, ${b}`;
+        }
+        
+        // Hervorhebe die aktuelle Wachstumsphase in den VPD-Tabellen
+        function highlightGrowthPhase(phase) {
+            // Definiere den Index basierend auf der Phase
+            let stageIndex;
+            switch(phase) {
+                case 'keimling':
+                case 'setzling':
+                    stageIndex = 0; // Erste Zeile: Keimung & Setzlinge
+                    break;
+                case 'vegetativ':
+                    stageIndex = 1; // Zweite Zeile: Vegetatives Wachstum
+                    break;
+                case 'vorblute':
+                    stageIndex = 2; // Dritte Zeile: Spätvegetative Phase
+                    break;
+                default:
+                    stageIndex = 1; // Standard: Vegetativ
+            }
+            
+            // Hole alle Phasen-Container (Tag und Nacht)
+            const dayStages = document.querySelectorAll('#day-values .vpd-stage');
+            const nightStages = document.querySelectorAll('#night-values .vpd-stage');
+            
+            // Entferne alle Hervorhebungen
+            dayStages.forEach(stage => {
+                stage.style.backgroundColor = '';
+                stage.style.borderLeft = '';
+                stage.style.padding = '';
+                stage.style.borderRadius = '';
+                const valueElement = stage.querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '';
+                    valueElement.style.fontWeight = '';
+                    valueElement.style.color = '';
+                }
+            });
+            
+            nightStages.forEach(stage => {
+                stage.style.backgroundColor = '';
+                stage.style.borderLeft = '';
+                stage.style.padding = '';
+                stage.style.borderRadius = '';
+                const valueElement = stage.querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '';
+                    valueElement.style.fontWeight = '';
+                    valueElement.style.color = '';
+                }
+            });
+            
+            // Füge Hervorhebung für aktuelle Phase hinzu
+            if (dayStages[stageIndex]) {
+                dayStages[stageIndex].style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                dayStages[stageIndex].style.padding = '10px';
+                dayStages[stageIndex].style.borderRadius = '5px';
+                dayStages[stageIndex].style.borderLeft = '3px solid #4CAF50';
+                
+                const valueElement = dayStages[stageIndex].querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '1.2em';
+                    valueElement.style.fontWeight = 'bold';
+                    valueElement.style.color = '#4CAF50';
+                }
+            }
+            
+            if (nightStages[stageIndex]) {
+                nightStages[stageIndex].style.backgroundColor = 'rgba(158, 119, 241, 0.1)';
+                nightStages[stageIndex].style.padding = '10px';
+                nightStages[stageIndex].style.borderRadius = '5px';
+                nightStages[stageIndex].style.borderLeft = '3px solid #9e77f1';
+                
+                const valueElement = nightStages[stageIndex].querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '1.2em';
+                    valueElement.style.fontWeight = 'bold';
+                    valueElement.style.color = '#9e77f1';
+                }
+            }
+            
+            // Aktualisiere auch die VPD-Interpretation basierend auf der aktuellen Phase
+            updateVPDInterpretationRanges(phase);
+        }
+        
+        // Aktualisiere die VPD-Interpretationsbereiche basierend auf der Phase
+        function updateVPDInterpretationRanges(phase) {
+            // Verwende die definierten VPD-Bereiche aus der Phasendefinition
+            const currentPhase = phaseDescriptions[phase];
+            
+            // Speichere die aktuellen Bereiche
+            window.currentDayRange = currentPhase.vpd_day;
+            window.currentNightRange = currentPhase.vpd_night;
+            
+            // Falls das VPD-Ergebnis bereits angezeigt wird, aktualisiere die Interpretation
+            const vpdValue = document.getElementById('vpdValue');
+            if (vpdValue && vpdValue.textContent) {
+                const vpd = parseFloat(vpdValue.textContent);
+                if (!isNaN(vpd)) {
+                    document.getElementById('vpdForm').dispatchEvent(new Event('submit'));
+                }
+            }
+        }
+        
+        // Event-Listener für die Phasen-Buttons
+        document.querySelectorAll('.phase-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const phaseId = this.id.split('-')[1];
+                currentGrowthPhase = phaseId;
+                localStorage.setItem('growth-phase', phaseId);
+                updatePhaseButtons();
+                
+                // Visuelles Feedback
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+        
+        // Initialisierung
+        updatePhaseButtons();
+    </script>
+    
+    <!-- JavaScript für die verbesserte Persistenz -->
+    <script>
+        // Verbesserte Persistenz der Wachstumsphase und Nachtzeit-Einstellungen
+        function setupAufzuchtzeltPersistence() {
+            // 1. Wachstumsphase wiederherstellen (bereits implementiert, aber sicherstellen)
+            if (localStorage.getItem('growth-phase')) {
+                currentGrowthPhase = localStorage.getItem('growth-phase');
+                updatePhaseButtons();
+            } else {
+                // Standardwert setzen und speichern
+                currentGrowthPhase = 'vegetativ';
+                localStorage.setItem('growth-phase', currentGrowthPhase);
+            }
+            
+            // 2. Tag/Nacht-Einstellungen und aktueller Status
+            // Aktuellen Status wiederherstellen
+            const lastNightMode = localStorage.getItem('aufzucht-night-mode') === 'true';
+            if (lastNightMode) {
+                // Wenn der letzte Status "Nacht" war, schalte auf Nacht um
+                const dayValues = document.getElementById('day-values');
+                const nightValues = document.getElementById('night-values');
+                
+                dayValues.style.display = 'none';
+                nightValues.style.display = 'block';
+                
+                const statusText = document.getElementById('current-time-status');
+                statusText.textContent = 'Nachtphase (' + localStorage.getItem('aufzucht-night-start') + ' - ' + localStorage.getItem('aufzucht-night-end') + ')';
+                statusText.style.color = '#9e77f1';
+            }
+            
+            // Event-Handler für den Tag/Nacht-Umschalter verbessern
+            document.getElementById('toggle-day-night').addEventListener('click', function() {
+                const dayValues = document.getElementById('day-values');
+                const isCurrentlyDay = dayValues.style.display !== 'none';
+                updateDayNightDisplay(!isCurrentlyDay);
+                
+                // Status speichern
+                localStorage.setItem('aufzucht-night-mode', (!isCurrentlyDay).toString());
+                
+                // Blatttemperatur-Hinweise anpassen
+                adjustLeafTempPlaceholder();
+            });
+            
+            // 3. Event-Listener verbessern für Phasen-Buttons
+            document.querySelectorAll('.phase-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const phaseId = this.id.split('-')[1];
+                    currentGrowthPhase = phaseId;
+                    
+                    // In localStorage speichern
+                    localStorage.setItem('growth-phase', phaseId);
+                    
+                    // UI aktualisieren
+                    updatePhaseButtons();
+                    
+                    // Visuelles Feedback
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+        }
+        
+        // Verbessere die bisherige Speicherfunktion für Nachtzeiten
+        document.getElementById('save-night-times').addEventListener('click', function() {
+            nightStartTime = document.getElementById('night-start').value;
+            nightEndTime = document.getElementById('night-end').value;
+            
+            // Speichern in localStorage
+            localStorage.setItem('aufzucht-night-start', nightStartTime);
+            localStorage.setItem('aufzucht-night-end', nightEndTime);
+            
+            // Einstellungen ausblenden und Status aktualisieren
+            document.getElementById('night-time-settings').style.display = 'none';
+            checkDayNightCycle();
+            
+            // Feedback für den Benutzer
+            alert('Nachtzeiten wurden gespeichert! (' + nightStartTime + ' - ' + nightEndTime + ')');
+        });
+        
+        // Initialer Aufruf der verbesserten Persistenz-Funktion
+        document.addEventListener('DOMContentLoaded', setupAufzuchtzeltPersistence);
+    </script>
+    
+    <div class="status-container" style="margin-top: 20px; padding: 15px; background-color: var(--background-medium); border-radius: 8px;">
+        <h3>Tageszyklus-Status</h3>
+        
+        <div style="display: flex; align-items: center; margin-top: 10px;">
+            <div id="daytime-indicator" class="indicator" 
+                 style="width: 15px; height: 15px; border-radius: 50%; margin-right: 10px;"></div>
+            <span id="daytime-status">Status wird geladen...</span>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <strong>Ziel-VPD-Werte:</strong> <span id="vpd-target">Wird geladen...</span>
+        </div>
+    </div>
+</body>
+</html> 

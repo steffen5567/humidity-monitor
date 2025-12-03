@@ -1,0 +1,656 @@
+[
+  {
+    "timestamp": "2025-06-27T20:58:36.479Z",
+    "temperature": 22.954572365862283,
+    "humidity": 64.52773921728674
+  },
+  {
+    "timestamp": "2025-06-27T20:28:36.479Z",
+    "temperature": 23.590958845191,
+    "humidity": 64.90473547715924
+  },
+  {
+    "timestamp": "2025-06-27T19:58:36.479Z",
+    "temperature": 22.651929678925157,
+    "humidity": 63.85206231799205
+  },
+  {
+    "timestamp": "2025-06-27T19:28:36.479Z",
+    "temperature": 25.464031066535124,
+    "humidity": 69.39610175309744
+  },
+  {
+    "timestamp": "2025-06-27T18:58:36.479Z",
+    "temperature": 24.960102390783668,
+    "humidity": 66.66732018714193
+  },
+  {
+    "timestamp": "2025-06-27T18:28:36.479Z",
+    "temperature": 23.83319129030343,
+    "humidity": 62.25262866705289
+  },
+  {
+    "timestamp": "2025-06-27T17:58:36.479Z",
+    "temperature": 24.344299733258417,
+    "humidity": 69.83369514094737
+  },
+  {
+    "timestamp": "2025-06-27T17:28:36.479Z",
+    "temperature": 23.101295948354096,
+    "humidity": 68.16030751954887
+  },
+  {
+    "timestamp": "2025-06-27T16:58:36.479Z",
+    "temperature": 23.032059004731796,
+    "humidity": 68.14249775348281
+  },
+  {
+    "timestamp": "2025-06-27T16:28:36.479Z",
+    "temperature": 23.91760129558406,
+    "humidity": 65.42406098157025
+  },
+  {
+    "timestamp": "2025-06-27T15:58:36.479Z",
+    "temperature": 22.942466083812786,
+    "humidity": 61.437315399838425
+  },
+  {
+    "timestamp": "2025-06-27T15:28:36.479Z",
+    "temperature": 24.57691837128776,
+    "humidity": 61.560266846799564
+  },
+  {
+    "timestamp": "2025-06-27T14:58:36.479Z",
+    "temperature": 24.568020397845242,
+    "humidity": 62.08540157843214
+  },
+  {
+    "timestamp": "2025-06-27T14:28:36.479Z",
+    "temperature": 23.191720512853287,
+    "humidity": 62.7014795471828
+  },
+  {
+    "timestamp": "2025-06-27T13:58:36.479Z",
+    "temperature": 24.085111489652743,
+    "humidity": 61.48092616120549
+  },
+  {
+    "timestamp": "2025-06-27T13:28:36.479Z",
+    "temperature": 23.031105838674133,
+    "humidity": 66.0176272071534
+  },
+  {
+    "timestamp": "2025-06-27T12:58:36.479Z",
+    "temperature": 22.582759269021427,
+    "humidity": 66.0629499247546
+  },
+  {
+    "timestamp": "2025-06-27T12:28:36.479Z",
+    "temperature": 24.032524509815914,
+    "humidity": 66.94517094750096
+  },
+  {
+    "timestamp": "2025-06-27T11:58:36.479Z",
+    "temperature": 22.965371876115245,
+    "humidity": 66.24358300891475
+  },
+  {
+    "timestamp": "2025-06-27T11:28:36.479Z",
+    "temperature": 23.498911473947885,
+    "humidity": 65.12275968584832
+  },
+  {
+    "timestamp": "2025-06-27T10:58:36.479Z",
+    "temperature": 25.135466056397945,
+    "humidity": 60.2343492500907
+  },
+  {
+    "timestamp": "2025-06-27T10:28:36.479Z",
+    "temperature": 25.13782704437033,
+    "humidity": 68.54507713648822
+  },
+  {
+    "timestamp": "2025-06-27T09:58:36.479Z",
+    "temperature": 22.661968664328533,
+    "humidity": 69.50610773769027
+  },
+  {
+    "timestamp": "2025-06-27T09:28:36.479Z",
+    "temperature": 23.69762656567513,
+    "humidity": 68.80321795217648
+  },
+  {
+    "timestamp": "2025-06-27T08:58:36.479Z",
+    "temperature": 24.04163146701918,
+    "humidity": 64.64138159528855
+  },
+  {
+    "timestamp": "2025-06-27T08:28:36.479Z",
+    "temperature": 23.101944484755474,
+    "humidity": 67.3257458118005
+  },
+  {
+    "timestamp": "2025-06-27T07:58:36.479Z",
+    "temperature": 25.230081215677522,
+    "humidity": 66.43647428477745
+  },
+  {
+    "timestamp": "2025-06-27T07:28:36.479Z",
+    "temperature": 25.40590300567694,
+    "humidity": 66.2636136422116
+  },
+  {
+    "timestamp": "2025-06-27T06:58:36.479Z",
+    "temperature": 22.621268770488545,
+    "humidity": 63.61996774241136
+  },
+  {
+    "timestamp": "2025-06-27T06:28:36.479Z",
+    "temperature": 24.427280884029326,
+    "humidity": 61.897061803850605
+  },
+  {
+    "timestamp": "2025-06-27T05:58:36.479Z",
+    "temperature": 24.764783382846304,
+    "humidity": 62.31070493794394
+  },
+  {
+    "timestamp": "2025-06-27T05:28:36.479Z",
+    "temperature": 23.184129148748458,
+    "humidity": 68.37855439276332
+  },
+  {
+    "timestamp": "2025-06-27T04:58:36.479Z",
+    "temperature": 22.573851197471704,
+    "humidity": 62.13996041087552
+  },
+  {
+    "timestamp": "2025-06-27T04:28:36.479Z",
+    "temperature": 25.4861110947115,
+    "humidity": 69.03810403994812
+  },
+  {
+    "timestamp": "2025-06-27T03:58:36.479Z",
+    "temperature": 25.299562799747367,
+    "humidity": 68.77376426532966
+  },
+  {
+    "timestamp": "2025-06-27T03:28:36.479Z",
+    "temperature": 22.852340721204325,
+    "humidity": 63.91850662815284
+  },
+  {
+    "timestamp": "2025-06-27T02:58:36.479Z",
+    "temperature": 24.106402498668356,
+    "humidity": 68.21220546727561
+  },
+  {
+    "timestamp": "2025-06-27T02:28:36.479Z",
+    "temperature": 25.375579362230653,
+    "humidity": 63.09555698370605
+  },
+  {
+    "timestamp": "2025-06-27T01:58:36.479Z",
+    "temperature": 24.984453474690476,
+    "humidity": 68.87219723368881
+  },
+  {
+    "timestamp": "2025-06-27T01:28:36.479Z",
+    "temperature": 24.675681194106858,
+    "humidity": 66.8583750217574
+  },
+  {
+    "timestamp": "2025-06-27T00:58:36.479Z",
+    "temperature": 24.34917660235408,
+    "humidity": 68.68093600677769
+  },
+  {
+    "timestamp": "2025-06-27T00:28:36.479Z",
+    "temperature": 24.718243716373188,
+    "humidity": 67.54093603458976
+  },
+  {
+    "timestamp": "2025-06-26T23:58:36.479Z",
+    "temperature": 22.531284032753298,
+    "humidity": 64.22306023413407
+  },
+  {
+    "timestamp": "2025-06-26T23:28:36.479Z",
+    "temperature": 22.781386422053046,
+    "humidity": 69.61824716135843
+  },
+  {
+    "timestamp": "2025-06-26T22:58:36.479Z",
+    "temperature": 24.341314118956024,
+    "humidity": 69.35252370528795
+  },
+  {
+    "timestamp": "2025-06-26T22:28:36.479Z",
+    "temperature": 25.1926326484493,
+    "humidity": 69.9569534710486
+  },
+  {
+    "timestamp": "2025-06-26T21:58:36.479Z",
+    "temperature": 22.888697943713776,
+    "humidity": 65.53482809336379
+  },
+  {
+    "timestamp": "2025-06-26T21:28:36.479Z",
+    "temperature": 22.628091448621504,
+    "humidity": 66.31984847871976
+  },
+  {
+    "timestamp": "2025-06-26T20:58:36.479Z",
+    "temperature": 23.663479608159317,
+    "humidity": 62.48486279098766
+  },
+  {
+    "timestamp": "2025-06-26T20:28:36.479Z",
+    "temperature": 22.990821882913256,
+    "humidity": 67.97916513974397
+  },
+  {
+    "timestamp": "2025-06-26T19:58:36.479Z",
+    "temperature": 23.570526747477402,
+    "humidity": 66.65751247406016
+  },
+  {
+    "timestamp": "2025-06-26T19:28:36.479Z",
+    "temperature": 25.182795555124976,
+    "humidity": 65.58683485502077
+  },
+  {
+    "timestamp": "2025-06-26T18:58:36.479Z",
+    "temperature": 22.648343111293087,
+    "humidity": 64.12680377267529
+  },
+  {
+    "timestamp": "2025-06-26T18:28:36.479Z",
+    "temperature": 22.95170984164367,
+    "humidity": 67.1960579933984
+  },
+  {
+    "timestamp": "2025-06-26T17:58:36.479Z",
+    "temperature": 22.523655871930014,
+    "humidity": 62.492619184543855
+  },
+  {
+    "timestamp": "2025-06-26T17:28:36.479Z",
+    "temperature": 24.505968185467893,
+    "humidity": 61.932718332839386
+  },
+  {
+    "timestamp": "2025-06-26T16:58:36.479Z",
+    "temperature": 23.385649616504228,
+    "humidity": 64.57265026820804
+  },
+  {
+    "timestamp": "2025-06-26T16:28:36.479Z",
+    "temperature": 23.08510102999056,
+    "humidity": 69.2722662246606
+  },
+  {
+    "timestamp": "2025-06-26T15:58:36.479Z",
+    "temperature": 25.104227904048496,
+    "humidity": 65.51819651446917
+  },
+  {
+    "timestamp": "2025-06-26T15:28:36.479Z",
+    "temperature": 22.74914477146769,
+    "humidity": 61.71438300933961
+  },
+  {
+    "timestamp": "2025-06-26T14:58:36.479Z",
+    "temperature": 23.719472319048794,
+    "humidity": 66.66996612184596
+  },
+  {
+    "timestamp": "2025-06-26T14:28:36.479Z",
+    "temperature": 24.84681846185173,
+    "humidity": 68.81514848751112
+  },
+  {
+    "timestamp": "2025-06-26T13:58:36.479Z",
+    "temperature": 23.070917522582274,
+    "humidity": 62.40640869611272
+  },
+  {
+    "timestamp": "2025-06-26T13:28:36.479Z",
+    "temperature": 22.574528233301166,
+    "humidity": 65.50501670301026
+  },
+  {
+    "timestamp": "2025-06-26T12:58:36.479Z",
+    "temperature": 22.885371446133178,
+    "humidity": 60.23466070209376
+  },
+  {
+    "timestamp": "2025-06-26T12:28:36.479Z",
+    "temperature": 23.649739004201564,
+    "humidity": 63.19999362325643
+  },
+  {
+    "timestamp": "2025-06-26T11:58:36.479Z",
+    "temperature": 24.033241400210407,
+    "humidity": 61.63651463968955
+  },
+  {
+    "timestamp": "2025-06-26T11:28:36.479Z",
+    "temperature": 24.82910171609971,
+    "humidity": 62.56326518363308
+  },
+  {
+    "timestamp": "2025-06-26T10:58:36.479Z",
+    "temperature": 23.936054703549168,
+    "humidity": 65.09194698794106
+  },
+  {
+    "timestamp": "2025-06-26T10:28:36.479Z",
+    "temperature": 22.94315380929672,
+    "humidity": 63.74952431984532
+  },
+  {
+    "timestamp": "2025-06-26T09:58:36.479Z",
+    "temperature": 23.69110612505806,
+    "humidity": 60.94867364535921
+  },
+  {
+    "timestamp": "2025-06-26T09:28:36.479Z",
+    "temperature": 22.648444333971106,
+    "humidity": 65.85412800891375
+  },
+  {
+    "timestamp": "2025-06-26T08:58:36.479Z",
+    "temperature": 25.23416963986447,
+    "humidity": 67.60046212990522
+  },
+  {
+    "timestamp": "2025-06-26T08:28:36.479Z",
+    "temperature": 23.11890511085195,
+    "humidity": 63.02657333771741
+  },
+  {
+    "timestamp": "2025-06-26T07:58:36.479Z",
+    "temperature": 25.34471638558837,
+    "humidity": 61.00351291923211
+  },
+  {
+    "timestamp": "2025-06-26T07:28:36.479Z",
+    "temperature": 24.378502712488597,
+    "humidity": 61.3553674300566
+  },
+  {
+    "timestamp": "2025-06-26T06:58:36.479Z",
+    "temperature": 23.107981571635342,
+    "humidity": 63.88813906746236
+  },
+  {
+    "timestamp": "2025-06-26T06:28:36.479Z",
+    "temperature": 25.042163562763577,
+    "humidity": 63.83558970569665
+  },
+  {
+    "timestamp": "2025-06-26T05:58:36.479Z",
+    "temperature": 25.115245127054855,
+    "humidity": 61.67649697485594
+  },
+  {
+    "timestamp": "2025-06-26T05:28:36.479Z",
+    "temperature": 23.147728357255044,
+    "humidity": 63.97494372178687
+  },
+  {
+    "timestamp": "2025-06-26T04:58:36.479Z",
+    "temperature": 24.45770107238115,
+    "humidity": 68.5243798464501
+  },
+  {
+    "timestamp": "2025-06-26T04:28:36.479Z",
+    "temperature": 25.172295784454796,
+    "humidity": 64.76646335892273
+  },
+  {
+    "timestamp": "2025-06-26T03:58:36.479Z",
+    "temperature": 22.52974198272782,
+    "humidity": 64.98809340986583
+  },
+  {
+    "timestamp": "2025-06-26T03:28:36.479Z",
+    "temperature": 24.034794330249902,
+    "humidity": 63.146041248700456
+  },
+  {
+    "timestamp": "2025-06-26T02:58:36.479Z",
+    "temperature": 23.775585917741473,
+    "humidity": 64.6202293508259
+  },
+  {
+    "timestamp": "2025-06-26T02:28:36.479Z",
+    "temperature": 22.9060933183293,
+    "humidity": 62.71205791064011
+  },
+  {
+    "timestamp": "2025-06-26T01:58:36.479Z",
+    "temperature": 24.011738384318242,
+    "humidity": 65.50584111651271
+  },
+  {
+    "timestamp": "2025-06-26T01:28:36.479Z",
+    "temperature": 24.789609363169177,
+    "humidity": 62.9220557463038
+  },
+  {
+    "timestamp": "2025-06-26T00:58:36.479Z",
+    "temperature": 25.412104527221025,
+    "humidity": 63.457459109787095
+  },
+  {
+    "timestamp": "2025-06-26T00:28:36.479Z",
+    "temperature": 24.892633590155672,
+    "humidity": 65.50740491752005
+  },
+  {
+    "timestamp": "2025-06-25T23:58:36.479Z",
+    "temperature": 22.728320477078285,
+    "humidity": 63.607349115768045
+  },
+  {
+    "timestamp": "2025-06-25T23:28:36.479Z",
+    "temperature": 23.564317376270193,
+    "humidity": 63.739788947684005
+  },
+  {
+    "timestamp": "2025-06-25T22:58:36.479Z",
+    "temperature": 23.529993138571456,
+    "humidity": 68.16838152584977
+  },
+  {
+    "timestamp": "2025-06-25T22:28:36.479Z",
+    "temperature": 24.62602515273048,
+    "humidity": 68.0794962245647
+  },
+  {
+    "timestamp": "2025-06-25T21:58:36.479Z",
+    "temperature": 25.0068489364316,
+    "humidity": 67.58040648509933
+  },
+  {
+    "timestamp": "2025-06-25T21:28:36.479Z",
+    "temperature": 25.44013163773439,
+    "humidity": 63.15874863517628
+  },
+  {
+    "timestamp": "2025-06-25T20:58:36.479Z",
+    "temperature": 23.184903704026564,
+    "humidity": 69.00432055900393
+  },
+  {
+    "timestamp": "2025-06-25T20:28:36.479Z",
+    "temperature": 24.832858482207776,
+    "humidity": 68.3692788696557
+  },
+  {
+    "timestamp": "2025-06-25T19:58:36.479Z",
+    "temperature": 23.708958672088038,
+    "humidity": 69.7474244650605
+  },
+  {
+    "timestamp": "2025-06-25T19:28:36.479Z",
+    "temperature": 24.20782544341042,
+    "humidity": 63.21789768677894
+  },
+  {
+    "temperature": 23.5,
+    "humidity": 71.7,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T20:58:40.881Z"
+  },
+  {
+    "temperature": 23.5,
+    "humidity": 71.6,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T20:59:11.201Z"
+  },
+  {
+    "temperature": 23.5,
+    "humidity": 71.1,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T20:59:41.549Z"
+  },
+  {
+    "temperature": 23.5,
+    "humidity": 71.3,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:00:11.879Z"
+  },
+  {
+    "temperature": 23.5,
+    "humidity": 71,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:00:42.206Z"
+  },
+  {
+    "temperature": 23.5,
+    "humidity": 71.2,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:01:12.541Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.4,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:01:42.887Z"
+  },
+  {
+    "temperature": 23.5,
+    "humidity": 71.7,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:02:13.219Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 70.9,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:02:43.547Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 70.6,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:03:13.884Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.4,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:03:44.223Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.6,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:04:14.558Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.4,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:04:44.891Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.7,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:05:15.247Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 70.7,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:05:45.575Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.8,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:06:15.909Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.5,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:06:46.226Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 71.4,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:07:16.560Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 70.5,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:07:46.896Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 72,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:08:17.229Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 72.3,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:08:47.563Z"
+  },
+  {
+    "temperature": 23.6,
+    "humidity": 69,
+    "sensor_id": "anzuchtszelt_dht22",
+    "location": "Anzuchtszelt",
+    "timestamp": "2025-06-27T21:10:18.403Z"
+  }
+]

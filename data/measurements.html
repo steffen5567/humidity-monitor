@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Measurements</title>
+    <script>
+        async function fetchMeasurements() {
+            const response = await fetch('/api/measurements');
+            let data = await response.json();
+
+            // Tabelle leeren
+            const tableBody = document.getElementById('measurementsTableBody');
+            tableBody.innerHTML = '';
+
+            // Optional: Daten nach Zeit sortieren (falls Server nicht schon sortiert liefert)
+            data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            let lastDisplayedTime = null;  // Zeitstempel des letzten angezeigten Eintrags (in ms)
+
+            data.forEach(measurement => {
+                // Zeitstempel in ms aus dem ISO-String
+                const currentTime = new Date(measurement.timestamp).getTime();
+
+                // Prüfen, ob dies der erste Eintrag ist oder mind. 15 Min (900.000 ms) vergangen sind
+                if (lastDisplayedTime === null || (currentTime - lastDisplayedTime >= 15 * 60 * 1000)) {
+
+                    // Datum/Uhrzeit formatieren: Tag.Monat.Jahr Stunde:Minute
+                    const dateObj = new Date(measurement.timestamp);
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    const hours = String(dateObj.getHours()).padStart(2, '0');
+                    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+
+                    const formattedTimestamp = `${day}.${month}.${year} ${hours}:${minutes}`;
+
+                    // Tabelleneintrag anlegen
+                    const row = document.createElement('tr');
+                    const timestampCell = document.createElement('td');
+                    const temperatureCell = document.createElement('td');
+                    const humidityCell = document.createElement('td');
+
+                    // Zellen befüllen
+                    timestampCell.textContent = formattedTimestamp;
+                    temperatureCell.textContent = measurement.temperature;
+                    humidityCell.textContent = measurement.humidity;
+
+                    // An die Tabelle anhängen
+                    row.appendChild(timestampCell);
+                    row.appendChild(temperatureCell);
+                    row.appendChild(humidityCell);
+                    tableBody.appendChild(row);
+
+                    // Zeitstempel für Vergleich merken
+                    lastDisplayedTime = currentTime;
+                }
+            });
+        }
+
+        // Beim Laden der Seite Messwerte abrufen
+        document.addEventListener('DOMContentLoaded', fetchMeasurements);
+    </script>
+</head>
+<body>
+    <h1>Past Measurements</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+            </tr>
+        </thead>
+        <tbody id="measurementsTableBody">
+            <!-- Messungen werden hier dynamisch hinzugefügt -->
+        </tbody>
+    </table>
+</body>
+</html>
+

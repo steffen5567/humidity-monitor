@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPD-Berechnung - Blütezelt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004d99;
+            --background-dark: #222;
+            --background-medium: #333;
+            --background-light: #444;
+            --text-color: #ffffff;
+            --accent-color: #66b2ff;
+            --success-color: #4CAF50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .container {
+            background-color: var(--background-light);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--background-medium);
+            border-radius: 8px;
+        }
+        
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .optimal {
+            color: var(--success-color);
+        }
+        
+        .warning {
+            color: var(--warning-color);
+        }
+        
+        .danger {
+            color: var(--danger-color);
+        }
+        
+        .back-link {
+            margin-top: 30px;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 10px 15px;
+            background-color: var(--background-light);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .back-link:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .indicator {
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+        }
+        .day-indicator {
+            background-color: #ffcc00; /* Gelb für Tag */
+            box-shadow: 0 0 5px 2px rgba(255, 204, 0, 0.5);
+        }
+        .night-indicator {
+            background-color: #6e7fff; /* Blau für Nacht */
+            box-shadow: 0 0 5px 2px rgba(110, 127, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VPD-Berechnung</h1>
+        <h2>Blütezelt</h2>
+    </div>
+    
+    <div class="container">
+        <form id="vpdForm">
+            <div class="form-group">
+                <label for="airTemp"><i class="fas fa-thermometer-half"></i> Lufttemperatur (°C):</label>
+                <input type="number" id="airTemp" name="airTemp" step="0.1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="leafTemp"><i class="fas fa-leaf"></i> Blatttemperatur (°C):</label>
+                <input type="number" id="leafTemp" name="leafTemp" step="0.1" placeholder="Meist 1-3°C unter Lufttemperatur bei aktiven Lampen">
+                <div class="leaf-temp-note" style="margin-top: 5px; font-size: 0.9em; color: #aaa;">
+                    <i class="fas fa-sun"></i> Tagsüber: Blatttemperatur liegt durch Verdunstungskühlung oft 1-3°C unter der Lufttemperatur.
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="humidity"><i class="fas fa-tint"></i> Relative Luftfeuchtigkeit (%):</label>
+                <input type="number" id="humidity" name="humidity" step="0.1" required>
+            </div>
+            
+            <button type="submit"><i class="fas fa-calculator"></i> VPD berechnen</button>
+        </form>
+        
+        <div class="result" id="result" style="display: none;">
+            <h3>Ergebnis:</h3>
+            <p>VPD: <span id="vpdValue" class="result-value">0.0</span> kPa</p>
+            <p id="vpdInterpretation"></p>
+        </div>
+    </div>
+    
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Zurück zur Hauptseite</a>
+    
+    <div class="vpd-info-box" style="background-color: var(--background-medium); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid var(--accent-color);">
+        <h3 style="margin-top: 0; color: var(--accent-color);">Optimale VPD-Werte für Blütephase</h3>
+        
+        <!-- Verbesserte Blütestart-Eingabe mit visuellem Fortschrittsbalken -->
+        <div style="margin-bottom: 20px; background-color: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border-left: 4px solid var(--accent-color);">
+            <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--accent-color); display: flex; align-items: center;">
+                <i class="fas fa-calendar-alt" style="margin-right: 8px;"></i> Blütephase-Tracker
+            </h4>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
+                <div style="flex: 1; min-width: 200px;">
+                    <label for="flowering-start" style="display: block; margin-bottom: 8px; font-weight: 500;">
+                        Blütestart:
+                    </label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="date" id="flowering-start" style="flex: 1; padding: 10px; background-color: var(--background-dark); color: var(--text-color); border: 1px solid #555; border-radius: 4px; font-size: 1rem;">
+                        <button id="save-flowering-start" style="background-color: var(--success-color); padding: 10px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 44px;">
+                            <i class="fas fa-save"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="flex: 1.5; min-width: 250px;">
+                    <div id="flowering-progress-container" style="display: none;">
+                        <!-- Fortschrittsbalken -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 0.9em; color: #66b2ff;">Frühe Blüte</span>
+                                <span style="font-size: 0.9em; color: #4CAF50;">Hauptblüte</span>
+                                <span style="font-size: 0.9em; color: #ff9800;">Späte Blüte</span>
+                            </div>
+                            <div style="height: 10px; background-color: var(--background-dark); border-radius: 5px; overflow: hidden; display: flex;">
+                                <div style="flex: 2; background-color: #66b2ff; height: 100%; border-right: 1px solid rgba(0,0,0,0.3);"></div>
+                                <div style="flex: 4; background-color: #4CAF50; height: 100%; border-right: 1px solid rgba(0,0,0,0.3);"></div>
+                                <div style="flex: 3; background-color: #ff9800; height: 100%;"></div>
+                            </div>
+                            <div id="flowering-marker" style="width: 12px; height: 12px; background-color: white; border: 2px solid #222; border-radius: 50%; margin-top: -11px; position: relative; transform: translateX(0%); transition: transform 0.5s ease;"></div>
+                        </div>
+                        
+                        <!-- Phase und Woche Anzeige -->
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div id="current-flowering-phase" style="display: inline-flex; align-items: center; font-weight: bold; font-size: 1.1em; padding: 5px 12px; border-radius: 20px; background-color: rgba(76, 175, 80, 0.15);">
+                                <i class="fas fa-seedling" style="margin-right: 6px;"></i> Hauptblüte
+                            </div>
+                            <div id="flowering-week" style="display: inline-flex; align-items: center; font-size: 0.95em; padding: 4px 10px; border-radius: 20px; background-color: rgba(255, 255, 255, 0.1);">
+                                <i class="fas fa-clock" style="margin-right: 5px; font-size: 0.9em;"></i> Woche 4
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="no-flowering-date" style="text-align: center; padding: 15px; color: #aaa;">
+                        <i class="fas fa-info-circle" style="margin-right: 5px;"></i> 
+                        Bitte Blütestart-Datum eingeben, um den Fortschritt zu sehen
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tag/Nacht-Umschalter mit Zeiteinstellung -->
+        <div style="margin-bottom: 15px; background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; display: flex; justify-content: space-between;">
+            <div>
+                <strong>Tageszeit:</strong> 
+                <span id="current-time-status">Tag/Nacht wird geprüft...</span>
+            </div>
+            <div>
+                <button id="toggle-day-night" class="tag-nacht-btn" style="background-color: var(--primary-color); padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                    Manuell umschalten
+                </button>
+                <button id="show-time-settings" style="background-color: var(--background-light); padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-cog"></i> Nachtzeiten
+                </button>
+            </div>
+        </div>
+        
+        <!-- Einstellungsbereich für Nachtzeiten (versteckt) -->
+        <div id="night-time-settings" style="display: none; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; margin-top: 10px;">
+            <h4 style="margin-top: 0; margin-bottom: 15px;">Nachtzeiten einstellen:</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <label for="night-start" style="display: block; margin-bottom: 5px;">Nacht beginnt um:</label>
+                    <input type="time" id="night-start" style="width: 100%; padding: 8px; background-color: var(--background-dark); color: var(--text-color); border: 1px solid #555; border-radius: 4px;">
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <label for="night-end" style="display: block; margin-bottom: 5px;">Nacht endet um:</label>
+                    <input type="time" id="night-end" style="width: 100%; padding: 8px; background-color: var(--background-dark); color: var(--text-color); border: 1px solid #555; border-radius: 4px;">
+                </div>
+            </div>
+            <button id="save-night-times" style="background-color: var(--success-color); padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px;">
+                Speichern
+            </button>
+        </div>
+        
+        <!-- Tageswerte -->
+        <div id="day-values">
+            <h4 style="color: var(--accent-color);">Tagphase (5:20 - 17:20 Uhr)</h4>
+            <div class="vpd-stages">
+                <div class="vpd-stage">
+                    <h4>Frühe Blüte</h4>
+                    <div class="vpd-value">1.0 - 1.5 kPa</div>
+                    <p>Übergangsphase vom vegetativen Wachstum zur Blüte. Ein moderater VPD unterstützt die Streckung und initiale Blütenbildung.</p>
+                </div>
+                
+                <div class="vpd-stage" style="background-color: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #4CAF50;">
+                    <h4>Hauptblüte (aktuelle Phase)</h4>
+                    <div class="vpd-value" style="font-size: 1.2em; font-weight: bold; color: #4CAF50;">1.2 - 1.8 kPa</div>
+                    <p>Die Pflanze entwickelt Blüten und Harze. Ein leicht erhöhter VPD fördert Nährstofftransport und reduziert Schimmelrisiko.</p>
+                </div>
+                
+                <div class="vpd-stage">
+                    <h4>Späte Blüte</h4>
+                    <div class="vpd-value">1.0 - 1.5 kPa</div>
+                    <p>Reifungsphase der Blüten. Ein leicht reduzierter VPD unterstützt die Reifung und Harzentwicklung.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nachtwerte -->
+        <div id="night-values" style="display: none;">
+            <h4 style="color: #9e77f1;">Nachtphase (17:20 - 5:20 Uhr)</h4>
+            <div class="vpd-stages">
+                <div class="vpd-stage">
+                    <h4>Frühe Blüte</h4>
+                    <div class="vpd-value">0.8 - 1.2 kPa</div>
+                    <p>Während der Nacht sollte der VPD niedriger sein, da die Temperatur gesenkt wird (16-20°C ideal).</p>
+                </div>
+                
+                <div class="vpd-stage" style="background-color: rgba(158, 119, 241, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #9e77f1;">
+                    <h4>Hauptblüte (aktuelle Phase)</h4>
+                    <div class="vpd-value" style="font-size: 1.2em; font-weight: bold; color: #9e77f1;">0.9 - 1.3 kPa</div>
+                    <p>Eine Temperaturdifferenz von 5-7°C zwischen Tag und Nacht fördert die Harzproduktion und Terpenentwicklung.</p>
+                </div>
+                
+                <div class="vpd-stage">
+                    <h4>Späte Blüte</h4>
+                    <div class="vpd-value">0.8 - 1.2 kPa</div>
+                    <p>Nächtliche Temperaturabsenkung ist besonders wichtig für die Ausprägung von Farben und Aromen in der späten Blüte.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="vpd-tips" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <h4>Tipps zur VPD-Optimierung über Tag und Nacht:</h4>
+            <ul>
+                <li>Halte die Luftfeuchtigkeit nachts 5-10% höher als am Tag, um dem Temperaturabfall zu begegnen</li>
+                <li>Ideal: Temperatur nachts um 5-7°C absenken (auf 16-20°C)</li>
+                <li>Die Luftzirkulation kann nachts leicht reduziert werden</li>
+                <li>Die nächtliche Temperaturdifferenz fördert kompakten Wuchs und stärkere Blütenbildung</li>
+                <li>Achte auf komplette Dunkelheit während der Nachtphase</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="status-container" style="margin-top: 20px; padding: 15px; background-color: var(--background-medium); border-radius: 8px;">
+        <h3>Tageszyklus-Status</h3>
+        
+        <div style="display: flex; align-items: center; margin-top: 10px;">
+            <div id="daytime-indicator" class="indicator" 
+                 style="width: 15px; height: 15px; border-radius: 50%; margin-right: 10px;"></div>
+            <span id="daytime-status">Status wird geladen...</span>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <strong>Ziel-VPD-Werte:</strong> <span id="vpd-target">Wird geladen...</span>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // Socket.IO-Verbindung herstellen
+        const socket = io();
+        
+        // VPD-Berechnung mit Tag/Nacht-Berücksichtigung
+        document.getElementById('vpdForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const airTemp = parseFloat(document.getElementById('airTemp').value);
+            let leafTemp = document.getElementById('leafTemp').value;
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            
+            // Überprüfe, ob wir einen Tag/Nacht-Status haben
+            const isDaytime = document.getElementById('daytime-status') && 
+                             document.getElementById('daytime-status').textContent.includes('Tagphase');
+            
+            // Automatische Blatttemperatur-Anpassung, wenn keine manuelle Eingabe
+            if (!leafTemp || leafTemp.trim() === '') {
+                if (isDaytime) {
+                    // Bei Tag: Blatttemperatur = Lufttemperatur + 1°C (wärmer als Umgebung)
+                    leafTemp = airTemp + 1.0;
+                } else {
+                    // Bei Nacht: Blatttemperatur ≈ Lufttemperatur (nur minimal reduziert)
+                    leafTemp = airTemp - 0.2; // Nur leicht unter Lufttemperatur
+                }
+                
+                // Aktualisiere das Eingabefeld
+                document.getElementById('leafTemp').value = leafTemp.toFixed(1);
+            } else {
+                // Konvertiere zu Zahl, falls manuell eingegeben
+                leafTemp = parseFloat(leafTemp);
+            }
+            
+            // Berechnung des VPD-Werts
+            const vpd = calculateVPD(airTemp, leafTemp, humidity);
+            
+            // Ergebnisse anzeigen
+            document.getElementById('vpdValue').textContent = vpd.toFixed(2);
+            
+            // VPD-Interpretation basierend auf Tag/Nacht und Blütephase
+            const vpdInterpretation = document.getElementById('vpdInterpretation');
+            const vpdValueClass = document.getElementById('vpdValue').classList;
+            
+            vpdValueClass.remove('optimal', 'warning', 'danger');
+            
+            let optimalRange;
+            if (isDaytime) {
+                // Optimale Bereiche für Tag - erweitert für Blütephase
+                optimalRange = { min: 0.8, max: 1.6 }; // War vorher 0.8-1.3, jetzt höher für Blütephase
+            } else {
+                // Optimale Bereiche für Nacht
+                optimalRange = { min: 0.4, max: 0.8 }; // Für Nacht (niedriger VPD)
+            }
+            
+            // Bewertung des VPD-Werts
+            if (vpd >= optimalRange.min && vpd <= optimalRange.max) {
+                vpdInterpretation.textContent = `Optimal für ${isDaytime ? 'Tagphase' : 'Nachtphase'} (${optimalRange.min} - ${optimalRange.max} kPa)`;
+                vpdValueClass.add('optimal');
+            } else if (vpd < optimalRange.min) {
+                vpdInterpretation.textContent = `Zu niedrig für ${isDaytime ? 'Tagphase' : 'Nachtphase'} (unter ${optimalRange.min} kPa)`;
+                vpdValueClass.add('warning');
+            } else {
+                vpdInterpretation.textContent = `Zu hoch für ${isDaytime ? 'Tagphase' : 'Nachtphase'} (über ${optimalRange.max} kPa)`;
+                vpdValueClass.add('warning');
+            }
+            
+            // Zusatzinformationen basierend auf Tag/Nacht
+            let additionalInfo = "";
+            if (isDaytime) {
+                if (vpd > 1.8) { // Erhöht von 1.5 auf 1.8
+                    additionalInfo = "ACHTUNG: Sehr hoher VPD kann zu Wasserstress führen. Erhöhe die Luftfeuchtigkeit.";
+                }
+            } else {
+                if (vpd < 0.3) {
+                    additionalInfo = "ACHTUNG: Sehr niedriger VPD während der Nacht erhöht das Schimmelrisiko. Luftfeuchtigkeit senken oder Temperatur leicht erhöhen.";
+                }
+            }
+            
+            if (additionalInfo) {
+                vpdInterpretation.innerHTML += `<br><span style="color: var(--warning-color);">${additionalInfo}</span>`;
+            }
+            
+            document.getElementById('result').style.display = 'block';
+        });
+        
+        // Funktion zur Berechnung des VPD
+        function calculateVPD(airTemp, leafTemp, humidity) {
+            // Sättigungsdampfdruck bei Lufttemperatur (kPa)
+            const svpAir = 0.6108 * Math.exp((17.27 * airTemp) / (airTemp + 237.3));
+            
+            // Sättigungsdampfdruck bei Blatttemperatur (kPa)
+            const svpLeaf = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+            
+            // Aktueller Dampfdruck (kPa)
+            const vpAir = svpAir * (humidity / 100);
+            
+            // VPD (kPa)
+            const vpd = svpLeaf - vpAir;
+            
+            return Math.max(0, vpd); // VPD kann nicht negativ sein
+        }
+        
+        // Wenn vom Server das Event "updateHumidity" (Blütezelt) kommt, Felder auffüllen
+        socket.on('updateHumidity', (data) => {
+            console.log('updateHumidity (Blütezelt):', data);
+
+            // data = { temperature: xx, humidity: yy, ... }
+            if (typeof data.temperature === 'number') {
+                document.getElementById('airTemp').value = data.temperature;
+            }
+            if (typeof data.humidity === 'number') {
+                document.getElementById('humidity').value = data.humidity;
+            }
+            
+            // Automatisch Berechnung triggern
+            document.getElementById('vpdForm').dispatchEvent(new Event('submit'));
+        });
+        
+        // Ersetze den bestehenden Tag/Nacht-Code durch diese anpassbare Version
+        // Standardzeiten für Blütezelt (können vom Benutzer angepasst werden)
+        let nightStartTime = localStorage.getItem('bluete-night-start') || '17:20';
+        let nightEndTime = localStorage.getItem('bluete-night-end') || '05:20';
+
+        // Initialisiere die Zeitauswahlfelder
+        document.getElementById('night-start').value = nightStartTime;
+        document.getElementById('night-end').value = nightEndTime;
+
+        // Anzeigen/Verstecken der Zeiteinstellungen
+        document.getElementById('show-time-settings').addEventListener('click', function() {
+            const settingsDiv = document.getElementById('night-time-settings');
+            if (settingsDiv.style.display === 'none') {
+                settingsDiv.style.display = 'block';
+            } else {
+                settingsDiv.style.display = 'none';
+            }
+        });
+
+        // Speichern der Nachtzeiten
+        document.getElementById('save-night-times').addEventListener('click', function() {
+            nightStartTime = document.getElementById('night-start').value;
+            nightEndTime = document.getElementById('night-end').value;
+            
+            // Speichern in localStorage
+            localStorage.setItem('bluete-night-start', nightStartTime);
+            localStorage.setItem('bluete-night-end', nightEndTime);
+            
+            // Einstellungen ausblenden und Status aktualisieren
+            document.getElementById('night-time-settings').style.display = 'none';
+            checkDayNightCycle();
+            
+            // Feedback für den Benutzer
+            alert('Nachtzeiten wurden gespeichert! (' + nightStartTime + ' - ' + nightEndTime + ')');
+        });
+
+        function checkDayNightCycle() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentTime = hours * 60 + minutes; // Zeit in Minuten seit Mitternacht
+            
+            // Wandle die gespeicherten Zeiten in Minuten seit Mitternacht um
+            const [startHours, startMinutes] = nightStartTime.split(':').map(Number);
+            const [endHours, endMinutes] = nightEndTime.split(':').map(Number);
+            const nightStart = startHours * 60 + startMinutes;
+            const nightEnd = endHours * 60 + endMinutes;
+            
+            let isNighttime;
+            
+            // Prüfe, ob aktuelle Zeit zwischen Start und Ende liegt
+            if (nightStart > nightEnd) {
+                // Fall, wenn Nacht über Mitternacht geht (z.B. 17:20 - 05:20)
+                isNighttime = currentTime >= nightStart || currentTime < nightEnd;
+            } else {
+                // Fall, wenn Nacht in einem Tag liegt (selten, aber möglich)
+                isNighttime = currentTime >= nightStart && currentTime < nightEnd;
+            }
+            
+            updateDayNightDisplay(isNighttime);
+            return isNighttime;
+        }
+
+        function updateDayNightDisplay(isNight) {
+            const dayValues = document.getElementById('day-values');
+            const nightValues = document.getElementById('night-values');
+            const statusText = document.getElementById('current-time-status');
+            
+            if (isNight) {
+                dayValues.style.display = 'none';
+                nightValues.style.display = 'block';
+                statusText.textContent = 'Nachtphase (' + nightStartTime + ' - ' + nightEndTime + ')';
+                statusText.style.color = '#9e77f1';
+            } else {
+                dayValues.style.display = 'block';
+                nightValues.style.display = 'none';
+                statusText.textContent = 'Tagphase (' + nightEndTime + ' - ' + nightStartTime + ')';
+                statusText.style.color = '#4CAF50';
+            }
+        }
+
+        // Initialer Check
+        const isNight = checkDayNightCycle();
+
+        // Erlaube manuelles Umschalten
+        document.getElementById('toggle-day-night').addEventListener('click', function() {
+            const dayValues = document.getElementById('day-values');
+            const isCurrentlyDay = dayValues.style.display !== 'none';
+            updateDayNightDisplay(!isCurrentlyDay);
+        });
+
+        // Check alle Minute aktualisieren
+        setInterval(checkDayNightCycle, 60000);
+
+        // Blütestart-Funktionalität
+        let floweringStartDate = localStorage.getItem('flowering-start-date');
+        const floweringStartInput = document.getElementById('flowering-start');
+
+        // Initialisiere das Datum, falls gespeichert
+        if (floweringStartDate) {
+            floweringStartInput.value = floweringStartDate;
+            updateFloweringPhase();
+        }
+
+        // Verbesserte Blütephase-Anzeige
+        function updateFloweringPhase() {
+            if (!floweringStartDate) {
+                document.getElementById('flowering-progress-container').style.display = 'none';
+                document.getElementById('no-flowering-date').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('flowering-progress-container').style.display = 'block';
+            document.getElementById('no-flowering-date').style.display = 'none';
+            
+            const startDate = new Date(floweringStartDate);
+            const today = new Date();
+            
+            // Berechne Differenz in Tagen
+            const diffTime = Math.abs(today - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            // Berechne Woche (1-basiert)
+            const floweringWeek = Math.ceil(diffDays / 7);
+            
+            // Bestimme Phase und Fortschritt
+            let phase = '';
+            let phaseColor = '';
+            let phaseBackground = '';
+            let progress = 0; // Prozentualer Fortschritt für den Marker (0-100%)
+            
+            const totalWeeks = 9; // Annahme: Blüte dauert etwa 9 Wochen
+            progress = Math.min((diffDays / (totalWeeks * 7)) * 100, 100);
+            
+            if (floweringWeek <= 2) {
+                phase = 'Frühe Blüte';
+                phaseColor = '#66b2ff'; // Blau
+                phaseBackground = 'rgba(102, 178, 255, 0.15)';
+                highlightFloweringStage(0); // Erste Phase hervorheben
+            } else if (floweringWeek <= 6) {
+                phase = 'Hauptblüte';
+                phaseColor = '#4CAF50'; // Grün
+                phaseBackground = 'rgba(76, 175, 80, 0.15)';
+                highlightFloweringStage(1); // Zweite Phase hervorheben
+            } else {
+                phase = 'Späte Blüte';
+                phaseColor = '#ff9800'; // Orange
+                phaseBackground = 'rgba(255, 152, 0, 0.15)';
+                highlightFloweringStage(2); // Dritte Phase hervorheben
+            }
+            
+            // Aktualisiere die Anzeige
+            const phaseElement = document.getElementById('current-flowering-phase');
+            phaseElement.innerHTML = `<i class="fas fa-seedling" style="margin-right: 6px;"></i> ${phase}`;
+            phaseElement.style.color = phaseColor;
+            phaseElement.style.backgroundColor = phaseBackground;
+            
+            const weekElement = document.getElementById('flowering-week');
+            weekElement.innerHTML = `<i class="fas fa-clock" style="margin-right: 5px; font-size: 0.9em;"></i> Woche ${floweringWeek}`;
+            
+            // Aktualisiere den Fortschrittsmarker
+            const marker = document.getElementById('flowering-marker');
+            marker.style.transform = `translateX(${progress}%)`;
+        }
+
+        // Verbesserte Speicherfunktion
+        document.getElementById('save-flowering-start').addEventListener('click', function() {
+            floweringStartDate = document.getElementById('flowering-start').value;
+            
+            if (floweringStartDate) {
+                localStorage.setItem('flowering-start-date', floweringStartDate);
+                updateFloweringPhase();
+                
+                // Visuelles Feedback ohne Modal
+                const button = this;
+                const originalBackground = button.style.backgroundColor;
+                button.style.backgroundColor = '#4CAF50';
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                
+                setTimeout(() => {
+                    button.style.backgroundColor = originalBackground;
+                    button.innerHTML = '<i class="fas fa-save"></i>';
+                }, 1500);
+                
+            } else {
+                // Visuelles Feedback für Fehler
+                const button = this;
+                const originalBackground = button.style.backgroundColor;
+                button.style.backgroundColor = '#f44336';
+                button.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                
+                setTimeout(() => {
+                    button.style.backgroundColor = originalBackground;
+                    button.innerHTML = '<i class="fas fa-save"></i>';
+                }, 1500);
+            }
+        });
+
+        // Hervorhebe die aktuelle Blütephase in der VPD-Übersicht
+        function highlightFloweringStage(stageIndex) {
+            // Hole alle Phasen-Containter (Tag und Nacht)
+            const dayStages = document.querySelectorAll('#day-values .vpd-stage');
+            const nightStages = document.querySelectorAll('#night-values .vpd-stage');
+            
+            // Entferne alle Hervorhebungen
+            dayStages.forEach(stage => {
+                stage.style.backgroundColor = '';
+                stage.style.borderLeft = '';
+                const valueElement = stage.querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '';
+                    valueElement.style.fontWeight = '';
+                    valueElement.style.color = '';
+                }
+            });
+            
+            nightStages.forEach(stage => {
+                stage.style.backgroundColor = '';
+                stage.style.borderLeft = '';
+                const valueElement = stage.querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '';
+                    valueElement.style.fontWeight = '';
+                    valueElement.style.color = '';
+                }
+            });
+            
+            // Füge Hervorhebung für aktuelle Phase hinzu
+            if (dayStages[stageIndex]) {
+                dayStages[stageIndex].style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                dayStages[stageIndex].style.padding = '10px';
+                dayStages[stageIndex].style.borderRadius = '5px';
+                dayStages[stageIndex].style.borderLeft = '3px solid #4CAF50';
+                
+                const valueElement = dayStages[stageIndex].querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '1.2em';
+                    valueElement.style.fontWeight = 'bold';
+                    valueElement.style.color = '#4CAF50';
+                }
+            }
+            
+            if (nightStages[stageIndex]) {
+                nightStages[stageIndex].style.backgroundColor = 'rgba(158, 119, 241, 0.1)';
+                nightStages[stageIndex].style.padding = '10px';
+                nightStages[stageIndex].style.borderRadius = '5px';
+                nightStages[stageIndex].style.borderLeft = '3px solid #9e77f1';
+                
+                const valueElement = nightStages[stageIndex].querySelector('.vpd-value');
+                if (valueElement) {
+                    valueElement.style.fontSize = '1.2em';
+                    valueElement.style.fontWeight = 'bold';
+                    valueElement.style.color = '#9e77f1';
+                }
+            }
+            
+            // Aktualisiere auch die VPD-Interpretation basierend auf der aktuellen Phase
+            updateVPDInterpretationRanges(stageIndex);
+        }
+
+        // Aktualisiere die VPD-Interpretationsbereiche basierend auf der aktuellen Phase
+        function updateVPDInterpretationRanges(stageIndex) {
+            // Definiere die optimalen VPD-Bereiche je nach Phase
+            const dayRanges = [
+                { min: 1.0, max: 1.5 }, // Frühe Blüte
+                { min: 1.2, max: 1.8 }, // Hauptblüte
+                { min: 1.0, max: 1.5 }  // Späte Blüte
+            ];
+            
+            const nightRanges = [
+                { min: 0.8, max: 1.2 }, // Frühe Blüte
+                { min: 0.9, max: 1.3 }, // Hauptblüte
+                { min: 0.8, max: 1.2 }  // Späte Blüte
+            ];
+            
+            // Wähle die aktuellen Bereiche
+            window.currentDayRange = dayRanges[stageIndex];
+            window.currentNightRange = nightRanges[stageIndex];
+            
+            // Falls das VPD-Ergebnis bereits angezeigt wird, aktualisiere die Interpretation
+            const vpdValue = document.getElementById('vpdValue');
+            if (vpdValue && vpdValue.textContent) {
+                const vpd = parseFloat(vpdValue.textContent);
+                if (!isNaN(vpd)) {
+                    document.getElementById('vpdForm').dispatchEvent(new Event('submit'));
+                }
+            }
+        }
+
+        // Initialisiere und führe den Update beim Laden durch
+        updateFloweringPhase();
+
+        // Anpasse die Blatttemperatur basierend auf Tag/Nacht
+        function adjustLeafTempPlaceholder() {
+            const isNighttime = document.getElementById('night-values').style.display === 'block';
+            const leafTempInput = document.getElementById('leafTemp');
+            const airTempInput = document.getElementById('airTemp');
+            
+            if (isNighttime) {
+                // Nachts ist die Blatttemperatur etwa gleich der Lufttemperatur oder leicht darunter
+                leafTempInput.placeholder = "Ohne Lampe nachts meist gleich der Lufttemperatur";
+                
+                // Ändere den Hinweistext zur Blatttemperatur
+                const leafTempNote = document.querySelector('.leaf-temp-note');
+                if (leafTempNote) {
+                    leafTempNote.innerHTML = '<i class="fas fa-moon"></i> Nachts: Blatttemperatur ist meist gleich der Lufttemperatur, da keine Wärme von Lampen einwirkt.';
+                }
+            } else {
+                // Tagsüber ist die Blatttemperatur oft unter der Lufttemperatur
+                leafTempInput.placeholder = "Meist 1-3°C unter Lufttemperatur bei aktiven Lampen";
+                
+                // Ändere den Hinweistext zur Blatttemperatur
+                const leafTempNote = document.querySelector('.leaf-temp-note');
+                if (leafTempNote) {
+                    leafTempNote.innerHTML = '<i class="fas fa-sun"></i> Tagsüber: Blatttemperatur liegt durch Verdunstungskühlung oft 1-3°C unter der Lufttemperatur.';
+                }
+            }
+        }
+
+        // Füge einen Listener für den Tag/Nacht-Umschalter hinzu
+        document.getElementById('toggle-day-night').addEventListener('click', adjustLeafTempPlaceholder);
+
+        // Und auch einen für die Nachtzeit-Einstellungen
+        document.getElementById('save-night-times').addEventListener('click', adjustLeafTempPlaceholder);
+
+        // Initialer Aufruf
+        adjustLeafTempPlaceholder();
+
+        // Verbesserte Persistenz der Blütephase und Nachtzeit-Einstellungen
+        function setupBlütezeltPersistence() {
+            // 1. Blütestart-Datum speichern und wiederherstellen
+            const floweringStartInput = document.getElementById('flowering-start');
+            // Wiederherstellung beim Laden (bereits vorhanden, aber sicherstellen, dass es funktioniert)
+            if (localStorage.getItem('flowering-start-date')) {
+                floweringStartInput.value = localStorage.getItem('flowering-start-date');
+                // Initialisiere die Phasenberechnung und Anzeige
+                updateFloweringPhase();
+            }
+            
+            // 2. Tag/Nacht-Einstellungen und aktueller Status
+            // Aktuellen Status wiederherstellen
+            const lastNightMode = localStorage.getItem('bluete-night-mode') === 'true';
+            if (lastNightMode) {
+                // Wenn der letzte Status "Nacht" war, schalte auf Nacht um
+                const dayValues = document.getElementById('day-values');
+                const nightValues = document.getElementById('night-values');
+                
+                dayValues.style.display = 'none';
+                nightValues.style.display = 'block';
+                
+                const statusText = document.getElementById('current-time-status');
+                statusText.textContent = 'Nachtphase (' + localStorage.getItem('bluete-night-start') + ' - ' + localStorage.getItem('bluete-night-end') + ')';
+                statusText.style.color = '#9e77f1';
+            }
+            
+            // Event-Handler für den Tag/Nacht-Umschalter verbessern
+            document.getElementById('toggle-day-night').addEventListener('click', function() {
+                const dayValues = document.getElementById('day-values');
+                const isCurrentlyDay = dayValues.style.display !== 'none';
+                updateDayNightDisplay(!isCurrentlyDay);
+                
+                // Status speichern
+                localStorage.setItem('bluete-night-mode', (!isCurrentlyDay).toString());
+                
+                // Blatttemperatur-Hinweise anpassen
+                adjustLeafTempPlaceholder();
+            });
+        }
+
+        // Initialer Aufruf der verbesserten Persistenz-Funktion
+        document.addEventListener('DOMContentLoaded', setupBlütezeltPersistence);
+
+        // Tag/Nacht-Status abrufen
+        function checkDaytimeStatus() {
+            fetch('/api/vpd-status?zone=bluetezelt')
+                .then(response => response.json())
+                .then(data => {
+                    const isDaytime = data.is_daytime;
+                    
+                    // VPD-Zielwerte je nach Tag/Nacht anpassen
+                    const vpdTarget = document.getElementById('vpd-target');
+                    if (vpdTarget) {
+                        if (isDaytime) {
+                            vpdTarget.textContent = "0.8 - 1.6 kPa";
+                        } else {
+                            vpdTarget.textContent = "0.4 - 0.8 kPa";
+                        }
+                    }
+                    
+                    // Visuelles Feedback
+                    const daytimeStatus = document.getElementById('daytime-status');
+                    const daytimeIndicator = document.getElementById('daytime-indicator');
+                    
+                    if (daytimeStatus) {
+                        daytimeStatus.textContent = isDaytime ? "Tagphase (Licht an)" : "Nachtphase (Licht aus)";
+                    }
+                    
+                    if (daytimeIndicator) {
+                        daytimeIndicator.className = isDaytime ? "indicator day-indicator" : "indicator night-indicator";
+                    }
+                    
+                    // Automatisch Tag/Nacht-Modus umschalten
+                    updateDayNightDisplay(!isDaytime);
+                })
+                .catch(error => console.error('Fehler beim Abrufen des Tagzeit-Status:', error));
+        }
+        
+        // Initial und dann alle 5 Minuten aktualisieren
+        checkDaytimeStatus();
+        setInterval(checkDaytimeStatus, 300000);
+    </script>
+</body>
+</html> 

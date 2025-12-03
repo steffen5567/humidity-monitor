@@ -1,0 +1,77 @@
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+const path = require('path');
+
+// Initialisiere Express und HTTP-Server
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+let measurements = [];
+
+// Route für die HTML-Dateien
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/vpd', (req, res) => {
+  res.sendFile(path.join(__dirname, 'vpd.html'));
+});
+
+app.get('/measurements', (req, res) => {
+  res.sendFile(path.join(__dirname, 'measurements.html'));
+});
+
+// API-Routen für Messungen
+app.get('/api/measurements', (req, res) => {
+  res.json(measurements);
+});
+
+// Websocket-Verbindung herstellen
+io.on('connection', (socket) => {
+  console.log('New client connected');
+
+  socket.on('humidityData', (data) => {
+    console.log('Humidity Data Received:', data);
+    const timestamp = new Date().toISOString();
+    measurements.push({ ...data, timestamp });
+    io.emit('updateHumidity', data);  // Sende die Daten an alle verbundenen Clients
+    ^^^^^^^
+SyntaxError: invalid syntax
+root@v29264:~/raspberry_server# node server.js
+Server running on port 3006
+^C
+root@v29264:~/raspberry_server# nano server.js
+  GNU nano 6.2                        server.js
+
+app.get('/measurements', (req, res) => {
+  res.sendFile(path.join(__dirname, 'measurements.html'));
+});
+
+// API-Routen f  r Messungen
+app.get('/api/measurements', (req, res) => {
+  res.json(measurements);
+});
+
+// Websocket-Verbindung herstellen
+io.on('connection', (socket) => {
+  console.log('New client connected');
+
+  socket.on('humidityData', (data) => {
+    console.log('Humidity Data Received:', data);
+    const timestamp = new Date().toISOString();
+    measurements.push({ ...data, timestamp });
+    io.emit('updateHumidity', data);  // Sende die Daten an alle verbundenen Cl>
+  });
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Server auf Port 3006 starten
+const PORT = 3006;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stiefens Farm</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004d99;
+            --background-dark: #222;
+            --background-medium: #333;
+            --background-light: #444;
+            --text-color: #ffffff;
+            --accent-color: #66b2ff;
+            --success-color: #4CAF50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.2rem;
+            margin-top: 0;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            gap: 30px;
+        }
+        
+        .sensor-section {
+            background-color: var(--background-light);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .sensor-section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .sensor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .sensor-icon {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            color: var(--accent-color);
+        }
+        
+        .sensor-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .sensor-content {
+                flex-direction: row;
+            }
+        }
+        
+        .sensor-data {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .current-values {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .value-box {
+            flex: 1;
+            min-width: 140px;
+            background-color: var(--background-medium);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .value-label {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+        
+        .value-content {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .simple-gauge {
+            width: 100%;
+            height: 8px;
+            background-color: var(--background-dark);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .gauge-progress {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+        
+        .humidity-progress {
+            background-color: var(--accent-color);
+        }
+        
+        .temperature-progress {
+            background-color: var(--warning-color);
+        }
+        
+        .last-updated {
+            font-size: 0.8rem;
+            color: #aaa;
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .sensor-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .sensor-link {
+            display: inline-block;
+            background-color: var(--background-medium);
+            color: var(--text-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .sensor-link:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .sensor-link i {
+            margin-right: 8px;
+        }
+        
+        .action-button {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-3px);
+            filter: brightness(110%);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Stiefens Farm</h1>
+        <p class="subtitle">Umgebungsüberwachung für optimales Wachstum</p>
+    </div>
+    
+    <div class="container">
+        <div class="sensor-section">
+            <div class="sensor-header">
+                <div class="sensor-icon"><i class="fas fa-cannabis"></i></div>
+                <h2>Blütezelt</h2>
+            </div>
+            
+            <div class="sensor-content">
+                <div class="sensor-data">
+                    <div class="current-values">
+                        <div class="value-box">
+                            <div class="value-label">Luftfeuchtigkeit</div>
+                            <div id="bluetezelt-humidity-value" class="value-content">68.5%</div>
+                            <div class="simple-gauge">
+                                <div id="bluetezelt-humidity-progress" class="gauge-progress humidity-progress" style="width: 68.5%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="value-box">
+                            <div class="value-label">Temperatur</div>
+                            <div id="bluetezelt-temperature-value" class="value-content">24.3°C</div>
+                            <div class="simple-gauge">
+                                <div id="bluetezelt-temperature-progress" class="gauge-progress temperature-progress" style="width: 60.8%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="bluetezelt-last-updated" class="last-updated">Letzte Aktualisierung: 12:34:56</div>
+                    
+                    <div class="sensor-links">
+                        <a href="/vpd-bluetezelt.html" class="sensor-link">
+                            <i class="fas fa-chart-line"></i> VPD-Details
+                        </a>
+                        <a href="/measurements-bluetezelt.html" class="sensor-link">
+                            <i class="fas fa-history"></i> Messungsverlauf
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sensor-section">
+            <div class="sensor-header">
+                <div class="sensor-icon"><i class="fas fa-leaf"></i></div>
+                <h2>Aufzuchtszelt</h2>
+            </div>
+            
+            <div class="sensor-content">
+                <div class="sensor-data">
+                    <div class="current-values">
+                        <div class="value-box">
+                            <div class="value-label">Luftfeuchtigkeit</div>
+                            <div id="aufzuchtszelt-humidity-value" class="value-content">72.1%</div>
+                            <div class="simple-gauge">
+                                <div id="aufzuchtszelt-humidity-progress" class="gauge-progress humidity-progress" style="width: 72.1%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="value-box">
+                            <div class="value-label">Temperatur</div>
+                            <div id="aufzuchtszelt-temperature-value" class="value-content">23.8°C</div>
+                            <div class="simple-gauge">
+                                <div id="aufzuchtszelt-temperature-progress" class="gauge-progress temperature-progress" style="width: 59.5%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="aufzuchtszelt-last-updated" class="last-updated">Letzte Aktualisierung: 12:34:56</div>
+                    
+                    <div class="sensor-links">
+                        <a href="/vpd-aufzuchtszelt.html" class="sensor-link">
+                            <i class="fas fa-chart-line"></i> VPD-Details
+                        </a>
+                        <a href="/measurements-aufzuchtszelt.html" class="sensor-link">
+                            <i class="fas fa-history"></i> Messungsverlauf
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Sicherstellen, dass die Connection-Parameter korrekt sind
+        const socket = io({
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
+        
+        // Objekt zur Nachverfolgung der letzten Update-Zeitstempel
+        const lastUpdateTimestamp = {};
+        
+        // Debugging-Informationen anzeigen
+        socket.on('connect', function() {
+            console.log('Socket.IO verbunden mit Session ID:', socket.id);
+            document.getElementById('bluetezelt-last-updated').textContent = 'Verbindung hergestellt';
+            document.getElementById('aufzuchtszelt-last-updated').textContent = 'Verbindung hergestellt';
+        });
+
+        socket.on('disconnect', function() {
+            console.warn('Socket.IO Verbindung getrennt');
+            document.getElementById('bluetezelt-last-updated').textContent = 'Verbindung getrennt';
+            document.getElementById('aufzuchtszelt-last-updated').textContent = 'Verbindung getrennt';
+        });
+
+        // Debugging-Log für alle Socket.IO-Events
+        socket.onAny((event, ...args) => {
+            console.log(`Empfange Event "${event}":`, args[0]);
+        });
+
+        // Hilfsfunktion für die Gauge-Updates
+        function updateSimpleGauge(value, type, valueId, progressId) {
+            // Werte aktualisieren
+            const valueElement = document.getElementById(valueId);
+            const progressElement = document.getElementById(progressId);
+            
+            if (!valueElement || !progressElement) return;
+            
+            // Aktualisiere die Anzeige
+            if (type === 'humidity') {
+                valueElement.textContent = value.toFixed(1) + '%';
+                progressElement.style.width = Math.min(value, 100) + '%';
+            } else if (type === 'temperature') {
+                valueElement.textContent = value.toFixed(1) + '°C';
+                // Temperatur auf einer Skala von 0-40°C darstellen
+                const normalizedTemp = Math.min(Math.max(value / 40 * 100, 0), 100);
+                progressElement.style.width = normalizedTemp + '%';
+            }
+        }
+
+        // Ergänze die Initialdaten-Ladung um das Aufzuchtszelt
+        function loadInitialData() {
+            console.log("Lade Initialdaten...");
+            
+            // Blütezelt-Daten abrufen
+            fetch('/api/measurements/bluetezelt')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const latestData = data[0]; // Erste Messung (neueste)
+                        
+                        // Aktualisiere die Anzeige
+                        updateSimpleGauge(latestData.humidity, 'humidity', 'bluetezelt-humidity-value', 'bluetezelt-humidity-progress');
+                        updateSimpleGauge(latestData.temperature, 'temperature', 'bluetezelt-temperature-value', 'bluetezelt-temperature-progress');
+                        
+                        // Zeitstempel aktualisieren
+                        document.getElementById('bluetezelt-last-updated').textContent = 
+                            `Letzte Aktualisierung: ${new Date(latestData.timestamp).toLocaleTimeString()} (Initial)`;
+                    }
+                })
+                .catch(error => console.error('Fehler beim Abrufen der Blütezelt-Daten:', error));
+                
+            // Aufzuchtszelt-Daten abrufen
+            fetch('/api/measurements/aufzuchtszelt')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const latestData = data[0]; // Erste Messung (neueste)
+                        
+                        // Aktualisiere die Anzeige
+                        updateSimpleGauge(latestData.humidity, 'humidity', 'aufzuchtszelt-humidity-value', 'aufzuchtszelt-humidity-progress');
+                        updateSimpleGauge(latestData.temperature, 'temperature', 'aufzuchtszelt-temperature-value', 'aufzuchtszelt-temperature-progress');
+                        
+                        // Zeitstempel aktualisieren
+                        document.getElementById('aufzuchtszelt-last-updated').textContent = 
+                            `Letzte Aktualisierung: ${new Date(latestData.timestamp).toLocaleTimeString()} (Initial)`;
+                    }
+                })
+                .catch(error => console.error('Fehler beim Abrufen der Aufzuchtszelt-Daten:', error));
+        }
+
+        // WICHTIG: Diese Zeile fehlt - sie ruft die Datenladungsfunktion beim Laden der Seite auf
+        document.addEventListener('DOMContentLoaded', loadInitialData);
+        
+        // Socket-Event-Handlers für eingehende Sensordaten
+        socket.on('updateHumidity', function(data) {
+            console.log('Blütezelt-Daten empfangen:', data);
+            updateSensorDisplay(data, 'bluetezelt', 'Socket');
+        });
+        
+        socket.on('updateHumiditySensor2', function(data) {
+            console.log('Aufzuchtszelt-Daten empfangen:', data);
+            updateSensorDisplay(data, 'aufzuchtszelt', 'Socket');
+        });
+        
+        // Funktion zum Aktualisieren der Sensor-Anzeige
+        function updateSensorDisplay(data, zeltId, quelle) {
+            // Prüfe, ob die Daten aktueller sind als die letzten aktualisierten Daten
+            const timestamp = new Date(data.timestamp || new Date());
+            const lastTimestamp = lastUpdateTimestamp[zeltId] || 0;
+            
+            if (!lastTimestamp || timestamp > lastTimestamp) {
+                // Aktualisiere die Anzeige
+                if (data.humidity !== undefined) {
+                    updateSimpleGauge(data.humidity, 'humidity', `${zeltId}-humidity-value`, `${zeltId}-humidity-progress`);
+                }
+                
+                if (data.temperature !== undefined) {
+                    updateSimpleGauge(data.temperature, 'temperature', `${zeltId}-temperature-value`, `${zeltId}-temperature-progress`);
+                }
+                
+                // Aktualisiere Zeitstempel
+                if (zeltId === 'bluetezelt') {
+                    document.getElementById('bluetezelt-last-updated').textContent = 
+                        `Letzte Aktualisierung: ${new Date(timestamp).toLocaleTimeString()} (${quelle})`;
+                } else if (zeltId === 'aufzuchtszelt') {
+                    document.getElementById('aufzuchtszelt-last-updated').textContent = 
+                        `Letzte Aktualisierung: ${new Date(timestamp).toLocaleTimeString()} (${quelle})`;
+                }
+                
+                // Zeitstempel speichern
+                lastUpdateTimestamp[zeltId] = timestamp;
+            } else {
+                console.log(`Ignoriere veraltete ${zeltId}-Daten von ${quelle}`);
+            }
+        }
+    </script>
+
+    <!-- Füge einen neuen Button für die manuelle VPD-Berechnung ein -->
+    <div class="manual-calc-container" style="text-align: center; margin-top: 30px;">
+        <a href="/vpd-manuell.html" class="action-button" style="background-color: var(--accent-color); font-size: 1.1em; padding: 12px 24px; margin-right: 15px;">
+            <i class="fas fa-calculator"></i> Manuelle VPD-Berechnung
+        </a>
+        
+        <a href="/grow-journal.html" class="action-button" style="background-color: var(--highlight-color, #8e44ad); font-size: 1.1em; padding: 12px 24px;">
+            <i class="fas fa-book"></i> Grow Journal
+        </a>
+    </div>
+</body>
+</html>
