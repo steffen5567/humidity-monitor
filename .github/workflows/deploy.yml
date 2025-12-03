@@ -1,0 +1,68 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh $SERVER_USER@$SERVER_HOST DEPLOY_PATH=$DEPLOY_PATH bash -s <<'ENDSSH'
+            set -e
+
+            echo "🚀 Starting deployment..."
+
+            # Navigate to deployment directory
+            cd $DEPLOY_PATH
+
+            # Pull latest changes
+            echo "📦 Pulling latest code..."
+            git pull origin master
+
+            # Navigate to data directory where Node.js app is located
+            cd data
+
+            # Install dependencies
+            echo "📦 Installing Node.js dependencies..."
+            npm install --silent
+
+            # Restart the Node.js service
+            echo "♻️  Restarting humidity-monitor service..."
+            sudo systemctl restart humidity-monitor
+
+            # Check service status
+            sudo systemctl status humidity-monitor --no-pager || echo "⚠️  Service status check failed"
+
+            echo "✅ Deployment completed successfully!"
+          ENDSSH
+
+      - name: Deployment status
+        if: success()
+        run: echo "✅ Application deployed successfully!"
+
+      - name: Deployment failed
+        if: failure()
+        run: echo "❌ Deployment failed. Check logs for details."

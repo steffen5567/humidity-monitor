@@ -34,3 +34,12 @@ instance/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Sensor data files (keep these on server only)
+data/data/*.json
+data/aufzuchtszelt.json
+data/bluetezelt.json
+
+# Backup files
+*.save
+*.save.*
